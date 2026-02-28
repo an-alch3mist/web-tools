@@ -180,74 +180,52 @@ main{position:relative;overflow:hidden;
   z-index:50;max-width:220px;
 }
 
-/* ── Right DSL Panel ── */
-#dslToggleBtn{
-  position:absolute;top:50%;right:0;transform:translateY(-50%);
-  background:var(--panel);border:1px solid var(--border);
-  border-right:none;border-radius:6px 0 0 6px;
-  font-family:'JetBrains Mono',monospace;
-  font-size:10.5px;color:var(--muted);letter-spacing:1.5px;
-  padding:16px 6px;cursor:pointer;writing-mode:vertical-rl;
-  transition:color .15s,border-color .15s,background .15s;
-  z-index:20;user-select:none;
-}
-#dslToggleBtn:hover{color:var(--purple);border-color:rgba(188,140,255,.5)}
-#dslToggleBtn.open{color:var(--purple);border-color:rgba(188,140,255,.4);background:rgba(188,140,255,.05)}
-
+/* ── Bottom DSL Drawer ── */
 #dslPanel{
-  position:absolute;top:0;right:0;bottom:36px;width:300px;
-  background:var(--panel);border-left:1px solid var(--border);
-  display:flex;flex-direction:column;overflow-y:auto;
-  padding:14px 12px;gap:11px;
-  transform:translateX(100%);transition:transform .22s ease;
-  z-index:15;min-width:220px;
+  position:absolute;left:0;right:0;bottom:36px;
+  height:340px;min-height:120px;max-height:80vh;
+  background:var(--panel);border-top:1px solid var(--border);
+  display:flex;flex-direction:row;gap:0;
+  transform:translateY(calc(100% + 1px));
+  transition:transform .22s ease;
+  z-index:15;
 }
-#dslPanel.open{transform:translateX(0)}
+#dslPanel.open{transform:translateY(0)}
 
+/* drag-to-resize handle at top of drawer */
 #dslResizeHandle{
-  position:absolute;top:0;left:-3px;bottom:0;width:6px;
-  cursor:ew-resize;z-index:10;
+  position:absolute;top:-3px;left:0;right:0;height:6px;
+  cursor:ns-resize;z-index:10;
   background:transparent;transition:background .15s;
 }
-#dslResizeHandle:hover,#dslResizeHandle.dragging{background:rgba(188,140,255,.3)}
+#dslResizeHandle:hover,#dslResizeHandle.dragging{background:rgba(188,140,255,.35)}
 
-/* ── DSL syntax highlight wrapper ── */
-.dsl-wrapper{
-  position:relative;
-  border-radius:5px;overflow:hidden;
-  border:1px solid var(--border);
-  background:var(--bg);
-  min-height:130px;
-  transition:border-color .15s;
+/* left col: textarea */
+#dslLeft{
+  flex:1;display:flex;flex-direction:column;
+  padding:10px 12px;gap:8px;overflow:hidden;
+  border-right:1px solid var(--border2);
 }
-.dsl-wrapper:focus-within{border-color:var(--purple)}
-.dsl-highlight{
-  position:absolute;top:0;left:0;right:0;bottom:0;
-  margin:0;padding:7px 8px;
-  font-family:'JetBrains Mono',monospace;font-size:13px;
-  line-height:1.65;white-space:pre;overflow:hidden;
-  pointer-events:none;tab-size:4;color:var(--text);
-  word-break:normal;
+/* right col: controls */
+#dslRight{
+  width:200px;flex-shrink:0;display:flex;flex-direction:column;
+  padding:10px 12px;gap:7px;overflow-y:auto;
 }
+
+/* ── DSL textarea ── */
 textarea.dsl{
-  position:relative;z-index:1;
-  width:100%;min-height:130px;
+  width:100%;flex:1;
   font-family:'JetBrains Mono',monospace;font-size:13px;
   line-height:1.65;white-space:pre;overflow:auto;
-  resize:vertical;padding:7px 8px;
-  background:transparent!important;border:none!important;outline:none;
-  color:transparent;caret-color:#e6edf3;
-  tab-size:4;display:block;
+  resize:none;padding:7px 8px;
+  background:var(--bg);
+  border:1px solid var(--border);border-radius:5px;
+  outline:none;color:var(--purple);
+  caret-color:#e6edf3;tab-size:4;display:block;
+  transition:border-color .15s;
+  min-height:0;
 }
-/* DSL token colors */
-.dh-node{color:#79c0ff}
-.dh-node2{color:#3fb950}
-.dh-tip{color:#bc8cff;font-weight:700}
-.dh-dash{color:#3d444d}
-.dh-paren{color:#8b949e}
-.dh-type{color:#f78166;font-weight:600}
-.dh-comment{color:#3d444d;font-style:italic}
-.dh-err{color:#8b949e}
+textarea.dsl:focus{border-color:var(--purple)}
 
 /* collapsible example */
 .ex-toggle{
@@ -301,12 +279,57 @@ textarea.dsl{
 .btn-cancel{border-color:var(--dim);color:var(--dim);background:transparent}
 .btn-cancel:hover{border-color:var(--muted);color:var(--muted)}
 
+/* collapsible sections */
+.coll-hdr{
+  display:flex;align-items:center;gap:6px;
+  cursor:pointer;padding:5px 6px;margin:-5px -6px;
+  border-radius:4px;transition:background .12s;
+  user-select:none;
+}
+.coll-hdr:hover{background:rgba(255,255,255,.04)}
+.coll-hdr .coll-arrow{
+  font-size:8px;color:var(--dim);
+  transition:transform .18s;flex-shrink:0;
+}
+.coll-hdr.open .coll-arrow{transform:rotate(90deg)}
+.coll-hdr .coll-label{
+  font-size:10.5px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--dim);flex:1;
+}
+.coll-hdr .coll-badge{
+  font-size:9px;color:var(--dim);letter-spacing:.5px;
+}
+.coll-body{
+  overflow:hidden;
+  max-height:0;
+  transition:max-height .22s ease, opacity .18s ease;
+  opacity:0;
+}
+.coll-body.open{
+  max-height:600px;
+  opacity:1;
+}
+
+/* node sel panel */
+#nodeEditSection .sec{border-radius:6px;padding:8px 10px;background:rgba(247,129,102,.04);border:1px solid rgba(247,129,102,.2)}
+
+/* box-select rect */
+#boxRect{fill:rgba(88,166,255,.07);stroke:#58a6ff;stroke-width:1.2;stroke-dasharray:5 3;pointer-events:none}
+
+/* multi-select highlight on nodes */
+.gnode.multi-sel .bd{stroke:#58a6ff!important;stroke-width:2!important}
+.gnode.multi-sel .gl{opacity:.18!important}
+
+/* undo/redo buttons */
+.hbtn.undoredo{letter-spacing:0;padding:4px 9px;font-size:13px}
+.hbtn.undoredo:disabled{opacity:.25;cursor:default;pointer-events:none}
+
 /* edge handle pulse */
 @keyframes pulse-h{0%,100%{opacity:.65}50%{opacity:1}}
 .edge-h-pulse{animation:pulse-h .9s ease-in-out infinite}
 
 /* prevent text selection while resizing */
-body.resizing{user-select:none;cursor:ew-resize!important}
+body.resizing{user-select:none}
 </style>
 </head>
 <body>
@@ -315,8 +338,12 @@ body.resizing{user-select:none;cursor:ew-resize!important}
   <h1>Dependency Graph Builder</h1>
   <span class="sub">Unity · D3.js</span>
   <div class="hbtns">
+    <button class="hbtn undoredo" id="btnUndo" onclick="undo()" title="Undo (Ctrl+Z)" disabled>↩</button>
+    <button class="hbtn undoredo" id="btnRedo" onclick="redo()" title="Redo (Ctrl+Y)" disabled>↪</button>
     <button class="hbtn" onclick="loadExample()">Example</button>
     <button class="hbtn focus" onclick="focusAll()">Focus ⌖ (F)</button>
+    <button class="hbtn" onclick="autoLayout()" id="btnAutoLayout" style="border-color:rgba(188,140,255,.4);color:var(--purple)" onmouseenter="this.style.background='rgba(188,140,255,.1)'" onmouseleave="this.style.background='transparent'">Auto Layout</button>
+    <button class="hbtn" id="dslToggleBtn" onclick="toggleDSL()" style="border-color:rgba(188,140,255,.4);color:var(--purple)" onmouseenter="this.style.background='rgba(188,140,255,.1)'" onmouseleave="this.style.background=document.getElementById('dslPanel').classList.contains('open')?'rgba(188,140,255,.08)':'transparent'">DSL ▾</button>
     <button class="hbtn" onclick="openExportModal()">Export…</button>
     <button class="hbtn danger" onclick="clearAll()">Clear</button>
   </div>
@@ -325,37 +352,54 @@ body.resizing{user-select:none;cursor:ew-resize!important}
 <aside id="leftSidebar">
   <div id="leftResizeHandle"></div>
 
-  <!-- Add Node -->
+  <!-- ── Add Node (collapsible) ── -->
   <div class="sec">
-    <div class="sec-title">Add Node</div>
-    <div class="field"><label>Name</label><input id="nName" placeholder="e.g. EntityStats"/></div>
-    <div class="field"><label>Kind</label>
-      <select id="nKind">
-        <option value="interface">interface</option>
-        <option value="impl" selected>class</option>
-        <option value="tester">test</option>
-        <option value="external">built-in</option>
-      </select>
+    <div class="coll-hdr open" onclick="toggleColl('addNode')" id="hdrAddNode">
+      <span class="coll-arrow">▶</span>
+      <span class="coll-label">Add Node</span>
     </div>
-    <div class="field">
-      <label>Note</label>
-      <textarea id="nNote" class="note-ta" placeholder="optional description…" rows="1" spellcheck="false" autocorrect="off"></textarea>
+    <div class="coll-body open" id="bodyAddNode" style="padding-top:8px">
+      <div class="field"><label>Name</label><input id="nName" placeholder="e.g. EntityStats"/></div>
+      <div class="field"><label>Kind</label>
+        <select id="nKind">
+          <option value="interface">interface</option>
+          <option value="impl" selected>class</option>
+          <option value="tester">test</option>
+          <option value="external">built-in</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Note</label>
+        <textarea id="nNote" class="note-ta" placeholder="optional description…" rows="1" spellcheck="false" autocorrect="off"></textarea>
+      </div>
+      <button class="btn btn-node" onclick="addNode()">+ Add Node</button>
     </div>
-    <button class="btn btn-node" onclick="addNode()">+ Add Node</button>
   </div>
 
   <hr/>
 
-  <!-- Edge Type -->
+  <!-- ── Add Edge (collapsible) ── -->
   <div class="sec">
-    <div class="sec-title">Edge Type <span style="color:var(--dim);font-size:9px;letter-spacing:1px">1-7 KEY</span></div>
-    <div class="etype-pills" id="etypePills"></div>
-    <div style="margin-top:9px;font-size:10.5px;color:var(--dim);line-height:2">
-      Hover node → anchors ◉ appear<br>
-      Click ◉ src → click ◉ target<br>
-      <span style="color:var(--cyan)">Mid/Right drag</span> pan · <span style="color:var(--blue)">F</span> focus<br>
-      <span style="color:var(--blue)">Esc</span> cancel · <span style="color:var(--red)">Del</span> delete<br>
-      <span style="color:var(--green)">Dbl-click</span> node to rename
+    <div class="coll-hdr open" onclick="toggleColl('addEdge')" id="hdrAddEdge">
+      <span class="coll-arrow">▶</span>
+      <span class="coll-label">Add Edge</span>
+    </div>
+    <div class="coll-body open" id="bodyAddEdge" style="padding-top:8px">
+      <!-- Edge Type -->
+      <div class="field">
+        <label style="margin-bottom:5px">Type <span style="color:var(--dim);font-size:9px;letter-spacing:1px">1-7 KEY</span></label>
+        <div class="etype-pills" id="etypePills"></div>
+      </div>
+      <div class="field"><label>From</label><select id="eFrom"><option value="">— node —</option></select></div>
+      <div class="field"><label>To</label><select id="eTo"><option value="">— node —</option></select></div>
+      <button class="btn btn-edge" onclick="addEdgeManual()">+ Add Edge</button>
+      <div style="margin-top:9px;font-size:10.5px;color:var(--dim);line-height:2">
+        Hover node → anchors ◉ appear<br>
+        Click ◉ src → click ◉ target<br>
+        <span style="color:var(--cyan)">Mid/Right drag</span> pan · <span style="color:var(--blue)">F</span> focus<br>
+        <span style="color:var(--blue)">Esc</span> cancel · <span style="color:var(--red)">Del</span> delete<br>
+        <span style="color:var(--green)">Dbl-click</span> node to rename
+      </div>
     </div>
   </div>
 
@@ -377,76 +421,93 @@ body.resizing{user-select:none;cursor:ew-resize!important}
     </div>
   </div>
 
-  <hr/>
+  <hr id="infoPanelSep" style="display:none"/>
 
-  <!-- Add Edge -->
-  <div class="sec">
-    <div class="sec-title">Add Edge</div>
-    <div class="field"><label>From</label><select id="eFrom"><option value="">— node —</option></select></div>
-    <div class="field"><label>To</label><select id="eTo"><option value="">— node —</option></select></div>
-    <button class="btn btn-edge" onclick="addEdgeManual()">+ Add Edge</button>
+  <!-- ── Selected Node (collapsible, hidden until node selected) ── -->
+  <div id="nodeEditSection" style="display:none">
+    <div class="sec">
+      <div class="coll-hdr open" onclick="toggleColl('selNode')" id="hdrSelNode">
+        <span class="coll-arrow">▶</span>
+        <span class="coll-label" style="color:var(--red)">Selected Node</span>
+        <span class="coll-badge" id="selNodeBadge"></span>
+      </div>
+      <div class="coll-body open" id="bodySelNode" style="padding-top:8px">
+        <div class="field"><label>Name</label><input id="selNodeName" placeholder="Node name"/></div>
+        <div class="field"><label>Kind</label>
+          <select id="selNodeKind">
+            <option value="interface">interface</option>
+            <option value="impl">class</option>
+            <option value="tester">test</option>
+            <option value="external">built-in</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Note</label>
+          <textarea id="selNodeNote" class="note-ta" rows="1" spellcheck="false" autocorrect="off" placeholder="optional description…"></textarea>
+        </div>
+      </div>
+    </div>
+    <hr/>
   </div>
 
-  <hr/>
-
+  <!-- ── Node List ── -->
   <div class="sec">
-    <div class="sec-title">Nodes (<span id="nodeCount">0</span>)</div>
-    <div id="nodeList"></div>
+    <div class="coll-hdr open" onclick="toggleColl('nodeList')" id="hdrNodeList">
+      <span class="coll-arrow">▶</span>
+      <span class="coll-label">Nodes</span>
+      <span class="coll-badge" id="nodeCount">0</span>
+    </div>
+    <div class="coll-body open" id="bodyNodeList" style="padding-top:6px">
+      <div id="nodeList"></div>
+    </div>
   </div>
 </aside>
 
 <main id="mainEl">
   <svg id="canvas" oncontextmenu="return false"></svg>
 
-  <!-- DSL toggle tab -->
-  <div id="dslToggleBtn" onclick="toggleDSL()">DSL IMPORT</div>
-
-  <!-- Right DSL Panel -->
+  <!-- ── Bottom DSL Drawer ── -->
   <div id="dslPanel">
     <div id="dslResizeHandle"></div>
-    <div class="sec-title" style="color:var(--purple);margin-bottom:0">Import Dependency DSL</div>
 
-    <!-- Collapsible syntax example -->
-    <div>
-      <div class="ex-toggle" id="exToggle" onclick="toggleExample()">
-        <span class="arr">▶</span> syntax &amp; examples
-      </div>
-      <div class="ex-body" id="exBody"><span style="color:var(--muted)">Arrow patterns (spaces optional):</span>
-<span class="dh-node">A</span> <span class="dh-tip"></span><span class="dh-dash">-(</span><span class="dh-type">type</span><span class="dh-dash">)-></span> <span class="dh-node2">B</span>          A→B
-<span class="dh-node">A</span><span class="dh-tip">&lt;</span><span class="dh-dash">-(</span><span class="dh-type">type</span><span class="dh-dash">)-></span><span class="dh-node2">B</span>          A↔B bidirectional
-<span class="dh-node">A</span><span class="dh-tip">&lt;</span><span class="dh-dash">-(</span><span class="dh-type">type</span><span class="dh-dash">)-</span><span class="dh-node2">B</span>           B→A reverse
-<span class="dh-node">A</span><span class="dh-dash">-(</span><span class="dh-type">type</span><span class="dh-dash">)-</span><span class="dh-node2">B</span>            no arrowheads
-
-<span style="color:var(--muted)">Example (click Append):</span>
-<code>HealthSystemTester-(uses)->IHealthSystem
-EntityStats-(implements)->IHealthSystem
-EntityStats&lt;-(event)->StackedHealthBar
-StackedHealthBar-(contains)->TMP_Text
-PlayerStats-(extends)->EntityStats</code></div>
-    </div>
-
-    <div class="dsl-wrapper">
-      <pre class="dsl-highlight" id="dslHighlight" aria-hidden="true"></pre>
+    <!-- Left: textarea -->
+    <div id="dslLeft">
+      <div style="font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--purple)">Dependency DSL</div>
       <textarea class="dsl" id="dslInput" spellcheck="false" autocorrect="off"
         placeholder="Paste Claude dependency output here…
 
-MyClass-(uses)->IMyInterface
-MyClass-(implements)->IBase
-IBase &lt;-(event)-> OtherClass"></textarea>
+NodeA -(type)-> NodeB
+NodeA &lt;-(type)-> NodeB   bidirectional
+NodeA &lt;-(type)- NodeB   reverse"></textarea>
     </div>
 
-    <div style="display:flex;gap:6px">
-      <button class="btn btn-parse" style="flex:1" onclick="parseDSL(false)">+ Append</button>
-      <button class="btn btn-parse" style="flex:1;opacity:.7" onclick="parseDSL(true)">↺ Replace</button>
-    </div>
+    <!-- Right: controls -->
+    <div id="dslRight">
+      <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:2px">Import</div>
+      <button class="btn btn-parse" onclick="parseDSL(false)">+ Append</button>
+      <button class="btn btn-parse" style="opacity:.7" onclick="parseDSL(true)">↺ Replace</button>
+      <button class="btn" style="border-color:var(--cyan);color:var(--cyan)" onclick="exportGraphToDSL()">⬇ Graph → DSL</button>
 
-    <hr/>
-    <div style="font-size:10px;color:var(--dim);line-height:1.9">
-      Auto-detected kinds:<br>
-      <span style="color:var(--blue)">IFoo</span> → interface ·
-      <span style="color:var(--purple)">FooTester</span> → test<br>
-      <span style="color:var(--amber)">TMP_Text/Image</span> → built-in<br>
-      New edge types get colors auto.
+      <hr style="margin:4px 0"/>
+
+      <!-- Collapsible syntax ref -->
+      <div class="ex-toggle" id="exToggle" onclick="toggleExample()">
+        <span class="arr">▶</span> syntax ref
+      </div>
+      <div class="ex-body" id="exBody"><span style="color:var(--muted)">Arrow patterns:</span>
+<span style="color:#79c0ff">A</span> <span style="color:#bc8cff">-(</span><span style="color:#f78166">type</span><span style="color:#bc8cff">)-></span> <span style="color:#3fb950">B</span>   A→B
+<span style="color:#79c0ff">A</span><span style="color:#bc8cff">&lt;-(</span><span style="color:#f78166">type</span><span style="color:#bc8cff">)-></span><span style="color:#3fb950">B</span>  A↔B
+<span style="color:#79c0ff">A</span><span style="color:#bc8cff">&lt;-(</span><span style="color:#f78166">type</span><span style="color:#bc8cff">)-</span><span style="color:#3fb950">B</span>   B→A
+
+<span style="color:var(--muted)">Node auto-kinds:</span>
+<span style="color:var(--blue)">IFoo</span> → interface
+<span style="color:var(--purple)">FooTester</span> → test
+<span style="color:var(--amber)">TMP_Text…</span> → built-in</div>
+
+      <hr style="margin:4px 0"/>
+      <div style="font-size:9.5px;color:var(--dim);line-height:1.8">
+        New edge types<br>get colors auto.
+      </div>
     </div>
   </div>
 
@@ -457,11 +518,11 @@ IBase &lt;-(event)-> OtherClass"></textarea>
     <div class="leg-grp" id="legKinds"></div>
   </div>
 
-  <div id="modebar">MID/RIGHT DRAG PAN · SCROLL ZOOM · HOVER NODE ◉ CONNECT · F FOCUS</div>
+  <div id="modebar">MID/RIGHT DRAG PAN · SCROLL ZOOM · ALT+DRAG BOX SELECT · F FOCUS · CTRL+Z UNDO</div>
 
   <div id="empty">
     <div class="big">◈</div>
-    <p>Add nodes, open <strong>DSL →</strong> panel, or click <strong>Example</strong><br>
+    <p>Add nodes, click <strong>DSL ▾</strong> in header to import, or click <strong>Example</strong><br>
     hover any node → anchors ◉ · dbl-click node to rename</p>
   </div>
 </main>
@@ -527,10 +588,13 @@ function anchorAbs(n,side){const o=anchorOffset(side);return{x:n.x+o.x,y:n.y+o.y
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let nodes=[],edges=[],uid=0;
-let selEdge=null,connecting=null,reconnectMode=null;
+let selEdge=null,selNode=null,connecting=null,reconnectMode=null;
 let activeType='implements';
 let tipFrozen=false;
 let editingNodeId=null;
+let selectedNodes=new Set(); // multi-select set of node ids
+let boxSel=null;             // {x0,y0,x1,y1} in SVG root coords, or null
+let undoStack=[],redoStack=[];
 
 // ── SVG setup ─────────────────────────────────────────────────────────────────
 const mainEl=document.getElementById('mainEl');
@@ -541,6 +605,7 @@ const defs=svg.append('defs');
 
 const zoom=d3.zoom().scaleExtent([.07,5])
   .filter(ev=>{
+    if(boxSel) return false; // block zoom during box-select
     if(ev.type==='wheel') return true;
     if(ev.button===1||ev.button===2) return true;
     if(ev.button===0){
@@ -558,6 +623,8 @@ svg.on('contextmenu',ev=>ev.preventDefault());
 const nodeLayer=root.append('g').attr('id','NL');
 const edgeLayer=root.append('g').attr('id','EL');
 const handleLayer=root.append('g').attr('id','HL');
+const boxLayer=root.append('g').attr('id','BL');
+boxLayer.append('rect').attr('id','boxRect').attr('display','none');
 
 const prevLine=root.append('path').attr('fill','none')
   .attr('stroke-width',1.5).attr('stroke-dasharray','4 3')
@@ -656,7 +723,8 @@ function edgePath(e,fanOffset){
 
   return{
     path:`M${p1.x},${p1.y} Q${cx},${cy} ${p2.x},${p2.y}`,
-    lx:cx,ly:cy,x1,y1,x2,y2,cx,cy
+    lx:(x1+2*cx+x2)/4, ly:(y1+2*cy+y2)/4,
+    x1,y1,x2,y2,cx,cy
   };
 }
 
@@ -753,20 +821,63 @@ function renderNodes(){
   const en=sel.enter().append('g').attr('class','gnode')
     .attr('transform',d=>`translate(${d.x},${d.y})`)
     .call(d3.drag()
-      .clickDistance(4) // must move 4px to count as drag (allows clean dblclick)
+      .clickDistance(4)
       .filter(ev=>!ev.target.classList.contains('anchor')&&ev.button===0
                   &&!ev.target.classList.contains('nx-bg'))
       .on('start',function(ev,d){
         if(connecting) return;
         d3.select(this).raise();tipFrozen=true;
+        // Add to multi-select if Shift held, otherwise normal single select
+        if(ev.sourceEvent?.shiftKey){
+          selectedNodes.add(d.id);
+          render();
+          return;
+        }
+        // If dragging a node not in multi-select, clear multi and select it
+        if(!selectedNodes.has(d.id)) selectedNodes.clear();
+        if(selNode!==d.id){
+          selNode=d.id;
+          selEdge=null;
+          const n=d;
+          document.getElementById('selNodeName').value=n.name;
+          document.getElementById('selNodeKind').value=n.kind;
+          document.getElementById('selNodeBadge').textContent=n.name.length>12?n.name.slice(0,11)+'…':n.name;
+          const ta=document.getElementById('selNodeNote');
+          ta.value=n.note||'';ta.style.height='auto';ta.style.height=ta.scrollHeight+'px';
+          document.getElementById('nodeEditSection').style.display='block';
+          document.getElementById('bodySelNode').classList.add('open');
+          document.getElementById('hdrSelNode').classList.add('open');
+          document.getElementById('panelSel').classList.remove('show');
+          document.getElementById('panelConnect').classList.remove('show');
+          setMode('idle','NODE SELECTED · EDIT IN PANEL · ESC DESELECT');
+          nodeLayer.selectAll('.gnode').each(function(nd){
+            const isSrc=connecting?.nodeId===nd.id;
+            const isSelN=nd.id===selNode;
+            const k=KINDS[nd.kind]||KINDS.impl;
+            d3.select(this).select('.bd').attr('stroke',isSrc?'#e6edf3':isSelN?'#f78166':k.stroke).attr('stroke-width',isSrc||isSelN?2:1.5);
+          });
+        }
       })
       .on('drag',function(ev,d){
         if(connecting) return;
-        d.x+=ev.dx;d.y+=ev.dy;
-        d3.select(this).attr('transform',`translate(${d.x},${d.y})`);
+        if(selectedNodes.size>1 && selectedNodes.has(d.id)){
+          // Move all selected nodes together
+          selectedNodes.forEach(id=>{
+            const n=nodes.find(n=>n.id===id);
+            if(n){n.x+=ev.dx;n.y+=ev.dy;}
+          });
+          nodeLayer.selectAll('.gnode').filter(nd=>selectedNodes.has(nd.id))
+            .attr('transform',nd=>`translate(${nd.x},${nd.y})`);
+        } else {
+          d.x+=ev.dx;d.y+=ev.dy;
+          d3.select(this).attr('transform',`translate(${d.x},${d.y})`);
+        }
         renderEdges();renderEdgeHandles();
       })
-      .on('end',()=>{tipFrozen=false})
+      .on('end',function(ev,d){
+        tipFrozen=false;
+        snapshot();
+      })
     )
     .on('mouseenter',(ev,d)=>{
       const k=KINDS[d.kind]||KINDS.impl;
@@ -784,8 +895,14 @@ function renderNodes(){
   // Glow
   en.append('rect').attr('class','gl')
     .attr('x',-2).attr('y',-2).attr('width',NW+4).attr('height',NH+4).attr('rx',8).attr('opacity',.07);
-  // Body
-  en.append('rect').attr('class','bd').attr('width',NW).attr('height',NH).attr('rx',6);
+  // Body — click selects node
+  en.append('rect').attr('class','bd').attr('width',NW).attr('height',NH).attr('rx',6)
+    .on('click',(ev,d)=>{
+      if(ev.defaultPrevented) return;
+      ev.stopPropagation();
+      if(connecting) return;
+      clickNode(d.id);
+    });
   // Badge
   en.append('rect').attr('class','bbg');
   en.append('text').attr('class','btxt').attr('pointer-events','none');
@@ -838,9 +955,14 @@ function renderNodes(){
     const k=KINDS[d.kind]||KINDS.impl;
     const g=d3.select(this);
     const isSrc=connecting?.nodeId===d.id;
+    const isSelN=d.id===selNode;
+    const isMulti=selectedNodes.has(d.id)&&!isSelN;
+
+    // multi-select CSS class
+    g.classed('multi-sel',isMulti);
 
     g.select('.gl').attr('fill',k.stroke);
-    g.select('.bd').attr('fill',k.fill).attr('stroke',isSrc?'#e6edf3':k.stroke).attr('stroke-width',isSrc?2:1.5);
+    g.select('.bd').attr('fill',k.fill).attr('stroke',isSrc?'#e6edf3':isSelN?'#f78166':k.stroke).attr('stroke-width',isSrc||isSelN?2:1.5);
 
     const bl=k.label.length*6+10;
     g.select('.bbg').attr('x',7).attr('y',-9).attr('width',bl).attr('height',14).attr('rx',3)
@@ -901,12 +1023,21 @@ document.getElementById('nodeEditorInput').addEventListener('keydown',ev=>{
 });
 document.getElementById('nodeEditorInput').addEventListener('blur',commitNodeEdit);
 
+// silent clear for parseDSL internal use (snapshot already taken)
+function clearAllSilent(){
+  nodes=[];edges=[];selEdge=null;selNode=null;selectedNodes.clear();connecting=null;reconnectMode=null;
+  prevLine.attr('opacity',0);
+  document.getElementById('panelConnect').classList.remove('show');
+  document.getElementById('panelSel').classList.remove('show');
+  document.getElementById('nodeEditSection').style.display='none';
+}
+
 // ── Anchor connect / reconnect ────────────────────────────────────────────────
 function onAnchorClick(d,side){
   if(reconnectMode){
     const{edgeId,end}=reconnectMode;
     const e=edges.find(e=>e.id===edgeId);
-    if(e){if(end==='s'){e.s=d.id;e.sA=side}else{e.t=d.id;e.tA=side}}
+    if(e){snapshot();if(end==='s'){e.s=d.id;e.sA=side}else{e.t=d.id;e.tA=side}}
     reconnectMode=null;updateReconnectUI();render();return;
   }
   selEdge=null;
@@ -918,6 +1049,7 @@ function onAnchorClick(d,side){
     setMode('connecting',`CONNECTING FROM "${d.name}" · CLICK TARGET ANCHOR OR ESC`);
     render();
   } else if(connecting.nodeId!==d.id){
+    snapshot();
     ensureMarker(activeType);
     edges.push({id:'e'+(++uid),s:connecting.nodeId,t:d.id,sA:connecting.side,tA:side,type:activeType,headS:false,headT:false});
     cancelConnect(false);render();
@@ -929,7 +1061,7 @@ function onAnchorClick(d,side){
 function cancelConnect(doRender=true){
   connecting=null;prevLine.attr('opacity',0);
   document.getElementById('panelConnect').classList.remove('show');
-  setMode('idle','MID/RIGHT DRAG PAN · SCROLL ZOOM · HOVER NODE ◉ CONNECT · F FOCUS');
+  setMode('idle','MID/RIGHT DRAG PAN · SCROLL ZOOM · ALT+DRAG BOX SELECT · F FOCUS');
   if(doRender) render();
 }
 
@@ -946,7 +1078,7 @@ function clickEdge(id){
     setMode('selected','EDGE SELECTED · DEL DELETE · ESC DESELECT');
   } else {
     document.getElementById('panelSel').classList.remove('show');
-    setMode('idle','MID/RIGHT DRAG PAN · SCROLL ZOOM · HOVER NODE ◉ CONNECT · F FOCUS');
+    setMode('idle','MID/RIGHT DRAG PAN · SCROLL ZOOM · ALT+DRAG BOX SELECT · F FOCUS');
   }
   render();
 }
@@ -980,20 +1112,26 @@ function updateReconnectUI(){
 }
 
 function delEdge(id){
+  snapshot();
   edges=edges.filter(e=>e.id!==id);
   if(selEdge===id){
     selEdge=null;reconnectMode=null;
     document.getElementById('panelSel').classList.remove('show');
-    setMode('idle','MID/RIGHT DRAG PAN · SCROLL ZOOM · HOVER NODE ◉ CONNECT · F FOCUS');
+    setMode('idle','MID/RIGHT DRAG PAN · SCROLL ZOOM · ALT+DRAG BOX SELECT · F FOCUS');
   }
   render();
 }
 
 function delNode(id){
+  snapshot();
   nodes=nodes.filter(n=>n.id!==id);
   edges=edges.filter(e=>e.s!==id&&e.t!==id);
   if(connecting?.nodeId===id) cancelConnect(false);
   if(selEdge&&!edges.find(e=>e.id===selEdge)){selEdge=null;document.getElementById('panelSel').classList.remove('show');}
+  if(selNode===id){
+    selNode=null;
+    document.getElementById('nodeEditSection').style.display='none';
+  }
   render();
 }
 
@@ -1008,24 +1146,87 @@ svg.on('mousemove.prev',function(ev){
     .attr('stroke',ETYPES[activeType]?.color||'#58a6ff').attr('opacity',.55);
 });
 
+// ── Box-select ────────────────────────────────────────────────────────────────
+svg.on('mousedown.boxsel',function(ev){
+  if(!ev.altKey||ev.button!==0) return;
+  if(connecting||reconnectMode) return;
+  ev.preventDefault();ev.stopPropagation();
+  const[mx,my]=d3.pointer(ev,root.node());
+  boxSel={x0:mx,y0:my,x1:mx,y1:my};
+  d3.select('#boxRect').attr('display',null).attr('x',mx).attr('y',my).attr('width',0).attr('height',0);
+  setMode('idle','BOX SELECT — DRAG TO SELECT NODES · RELEASE TO CONFIRM');
+});
+
+svg.on('mousemove.boxsel',function(ev){
+  if(!boxSel) return;
+  const[mx,my]=d3.pointer(ev,root.node());
+  boxSel.x1=mx;boxSel.y1=my;
+  const x=Math.min(boxSel.x0,mx),y=Math.min(boxSel.y0,my);
+  const w=Math.abs(mx-boxSel.x0),h=Math.abs(my-boxSel.y0);
+  d3.select('#boxRect').attr('x',x).attr('y',y).attr('width',w).attr('height',h);
+});
+
+svg.on('mouseup.boxsel',function(ev){
+  if(!boxSel) return;
+  const x0=Math.min(boxSel.x0,boxSel.x1),x1=Math.max(boxSel.x0,boxSel.x1);
+  const y0=Math.min(boxSel.y0,boxSel.y1),y1=Math.max(boxSel.y0,boxSel.y1);
+  const newSel=new Set();
+  nodes.forEach(n=>{
+    const cx=n.x+NW/2,cy=n.y+NH/2;
+    if(cx>=x0&&cx<=x1&&cy>=y0&&cy<=y1) newSel.add(n.id);
+  });
+  selectedNodes=newSel;
+  boxSel=null;
+  d3.select('#boxRect').attr('display','none');
+  if(newSel.size>0){
+    selNode=null;
+    document.getElementById('nodeEditSection').style.display='none';
+    setMode('idle',`${newSel.size} NODE${newSel.size>1?'S':''} SELECTED · DRAG TO MOVE · DEL DELETE · ESC CLEAR`);
+  } else {
+    setMode('idle','MID/RIGHT DRAG PAN · SCROLL ZOOM · ALT+DRAG BOX SELECT · F FOCUS');
+  }
+  render();
+});
+
 svg.on('click.bg',function(ev){
   const tgt=ev.target;
   if(tgt===svgEl||tgt.id==='root'||tgt.id==='EL'||tgt.id==='NL'){
     if(connecting){cancelConnect();return}
     if(reconnectMode){reconnectMode=null;updateReconnectUI();render();return}
-    if(selEdge) clickEdge(null);
+    if(selEdge){clickEdge(null);return}
+    if(selNode){clickNode(null);return}
+    if(selectedNodes.size){selectedNodes.clear();render();
+      setMode('idle','MID/RIGHT DRAG PAN · SCROLL ZOOM · ALT+DRAG BOX SELECT · F FOCUS');return}
   }
 });
 
 document.addEventListener('keydown',ev=>{
   if(document.activeElement.tagName==='INPUT'||document.activeElement.tagName==='TEXTAREA') return;
+  // Undo/Redo
+  if((ev.ctrlKey||ev.metaKey)&&ev.key==='z'&&!ev.shiftKey){ev.preventDefault();undo();return}
+  if((ev.ctrlKey||ev.metaKey)&&(ev.key==='y'||(ev.key==='z'&&ev.shiftKey))){ev.preventDefault();redo();return}
   if(ev.key==='Escape'){
     if(editingNodeId){commitNodeEdit();return}
+    if(boxSel){boxSel=null;d3.select('#boxRect').attr('display','none');render();return}
     if(reconnectMode){reconnectMode=null;updateReconnectUI();render();return}
     if(connecting){cancelConnect();return}
     if(selEdge){clickEdge(null);return}
+    if(selNode){clickNode(null);return}
+    if(selectedNodes.size){selectedNodes.clear();render();
+      setMode('idle','MID/RIGHT DRAG PAN · SCROLL ZOOM · ALT+DRAG BOX SELECT · F FOCUS');return}
   }
-  if((ev.key==='Delete'||ev.key==='Backspace')&&selEdge){delEdge(selEdge);return}
+  // Delete selected nodes or edge
+  if(ev.key==='Delete'||ev.key==='Backspace'){
+    if(selectedNodes.size){snapshot();[...selectedNodes].forEach(id=>delNodeSilent(id));selectedNodes.clear();render();return}
+    if(selEdge){delEdge(selEdge);return}
+  }
+  // A = select all
+  if(ev.key==='a'&&!ev.ctrlKey&&!ev.metaKey){
+    selectedNodes=new Set(nodes.map(n=>n.id));
+    selNode=null;document.getElementById('nodeEditSection').style.display='none';
+    setMode('idle',`${selectedNodes.size} NODES SELECTED · DRAG TO MOVE · DEL DELETE · ESC CLEAR`);
+    render();return;
+  }
   if(ev.key.toLowerCase()==='f'&&!ev.ctrlKey&&!ev.metaKey){focusAll();return}
   const types=Object.keys(ETYPES);
   const i=parseInt(ev.key)-1;
@@ -1051,7 +1252,7 @@ function setMode(cls,txt){
 
 // ── Resizable sidebars ────────────────────────────────────────────────────────
 (function(){
-  // Left sidebar
+  // Left sidebar - horizontal resize
   const leftHandle=document.getElementById('leftResizeHandle');
   let lDragging=false,lStartX=0,lStartW=0;
   leftHandle.addEventListener('mousedown',ev=>{
@@ -1065,38 +1266,156 @@ function setMode(cls,txt){
     if(!lDragging) return;
     const newW=Math.max(180,Math.min(500,lStartW+(ev.clientX-lStartX)));
     document.body.style.gridTemplateColumns=`${newW}px 1fr`;
+    saveLayout();
   });
   window.addEventListener('mouseup',()=>{
     if(!lDragging) return;
     lDragging=false;document.body.classList.remove('resizing');leftHandle.classList.remove('dragging');
   });
 
-  // Right DSL panel
-  const rightHandle=document.getElementById('dslResizeHandle');
-  let rDragging=false,rStartX=0,rStartW=0;
-  rightHandle.addEventListener('mousedown',ev=>{
+  // DSL bottom drawer - vertical resize
+  const dslHandle=document.getElementById('dslResizeHandle');
+  let dDragging=false,dStartY=0,dStartH=0;
+  dslHandle.addEventListener('mousedown',ev=>{
     if(!document.getElementById('dslPanel').classList.contains('open')) return;
-    rDragging=true;rStartX=ev.clientX;
-    rStartW=document.getElementById('dslPanel').offsetWidth;
+    dDragging=true;dStartY=ev.clientY;
+    dStartH=document.getElementById('dslPanel').offsetHeight;
     document.body.classList.add('resizing');
-    rightHandle.classList.add('dragging');
+    document.body.style.cursor='ns-resize';
+    dslHandle.classList.add('dragging');
     ev.preventDefault();ev.stopPropagation();
   });
   window.addEventListener('mousemove',ev=>{
-    if(!rDragging) return;
-    const newW=Math.max(220,Math.min(600,rStartW-(ev.clientX-rStartX)));
-    document.getElementById('dslPanel').style.width=newW+'px';
+    if(!dDragging) return;
+    const newH=Math.max(120,Math.min(window.innerHeight*0.8,dStartH-(ev.clientY-dStartY)));
+    document.getElementById('dslPanel').style.height=newH+'px';
+    saveLayout();
   });
   window.addEventListener('mouseup',()=>{
-    if(!rDragging) return;
-    rDragging=false;document.body.classList.remove('resizing');rightHandle.classList.remove('dragging');
+    if(!dDragging) return;
+    dDragging=false;document.body.classList.remove('resizing');
+    document.body.style.cursor='';
+    dslHandle.classList.remove('dragging');
   });
 })();
 
+function clickNode(id){
+  selNode=(selNode===id)?null:id;
+  _nodeEditSnapshotted=false;
+  selectedNodes.clear();
+  selEdge=null;connecting=null;prevLine.attr('opacity',0);
+  document.getElementById('panelConnect').classList.remove('show');
+  document.getElementById('panelSel').classList.remove('show');
+  document.getElementById('infoPanelSep').style.display='none';
+  const section=document.getElementById('nodeEditSection');
+  if(selNode){
+    const n=nodes.find(n=>n.id===selNode);
+    document.getElementById('selNodeName').value=n.name;
+    document.getElementById('selNodeKind').value=n.kind;
+    document.getElementById('selNodeBadge').textContent=n.name.length>12?n.name.slice(0,11)+'…':n.name;
+    const ta=document.getElementById('selNodeNote');
+    ta.value=n.note||'';ta.style.height='auto';ta.style.height=ta.scrollHeight+'px';
+    section.style.display='block';
+    // ensure body is open
+    document.getElementById('bodySelNode').classList.add('open');
+    document.getElementById('hdrSelNode').classList.add('open');
+    setMode('idle','NODE SELECTED · EDIT IN PANEL · ESC DESELECT');
+  } else {
+    section.style.display='none';
+    setMode('idle','MID/RIGHT DRAG PAN · SCROLL ZOOM · ALT+DRAG BOX SELECT · F FOCUS');
+  }
+  render();
+}
+
+let _nodeEditSnapshotted=false;
+function applyNodeEdit(){
+  if(!selNode) return;
+  const n=nodes.find(n=>n.id===selNode);
+  if(!n) return;
+  if(!_nodeEditSnapshotted){snapshot();_nodeEditSnapshotted=true;}
+  const name=document.getElementById('selNodeName').value.trim();
+  if(name) n.name=name;
+  n.kind=document.getElementById('selNodeKind').value;
+  n.note=document.getElementById('selNodeNote').value.trim();
+  document.getElementById('selNodeBadge').textContent=n.name.length>12?n.name.slice(0,11)+'…':n.name;
+  render();
+}
+
+// Auto-apply selected node fields on any change
+document.getElementById('selNodeName').addEventListener('input',applyNodeEdit);
+document.getElementById('selNodeKind').addEventListener('change',applyNodeEdit);
+document.getElementById('selNodeNote').addEventListener('input',function(){
+  this.style.height='auto';this.style.height=this.scrollHeight+'px';
+  applyNodeEdit();
+});
+
+function exportGraphToDSL(){
+  if(!edges.length){alert('No edges to export — add connections first.');return;}
+  const nodeMap={};
+  nodes.forEach(n=>{nodeMap[n.id]=n.name});
+  const lines=edges.map(e=>{
+    const src=nodeMap[e.s]||'?',tgt=nodeMap[e.t]||'?';
+    const lt=e.headS?'<':'';const rt=e.headT?'>':'';
+    return `${src} ${lt}-(${e.type})-${rt} ${tgt}`;
+  });
+  const dsl=lines.join('\n');
+  const ta=document.getElementById('dslInput');
+  ta.value=dsl;
+  // Open DSL panel if closed
+  const panel=document.getElementById('dslPanel');
+  if(!panel.classList.contains('open')) toggleDSL();
+}
+
+// ── Layout persistence ────────────────────────────────────────────────────────
+const COLL_SECTIONS=['addNode','addEdge','nodeList'];
+function saveLayout(){
+  const state={};
+  COLL_SECTIONS.forEach(id=>{
+    const body=document.getElementById('body'+id[0].toUpperCase()+id.slice(1));
+    if(body) state[id]=body.classList.contains('open');
+  });
+  const leftW=document.getElementById('leftSidebar').offsetWidth;
+  const dslH=parseInt(document.getElementById('dslPanel').style.height)||340;
+  try{localStorage.setItem('depgraph_layout',JSON.stringify({sections:state,leftW,dslH}));}catch(e){}
+}
+function loadLayout(){
+  try{
+    const raw=localStorage.getItem('depgraph_layout');
+    if(!raw) return;
+    const data=JSON.parse(raw);
+    if(data.leftW) document.body.style.gridTemplateColumns=`${data.leftW}px 1fr`;
+    if(data.dslH) document.getElementById('dslPanel').style.height=data.dslH+'px';
+    if(data.sections){
+      COLL_SECTIONS.forEach(id=>{
+        const open=data.sections[id]!==false;
+        const hdr=document.getElementById('hdr'+id[0].toUpperCase()+id.slice(1));
+        const body=document.getElementById('body'+id[0].toUpperCase()+id.slice(1));
+        if(!hdr||!body) return;
+        body.classList.toggle('open',open);
+        hdr.classList.toggle('open',open);
+      });
+    }
+  }catch(e){}
+}
+
+// ── Collapsible sections ──────────────────────────────────────────────────────
+function toggleColl(id){
+  const hdr=document.getElementById('hdr'+id[0].toUpperCase()+id.slice(1));
+  const body=document.getElementById('body'+id[0].toUpperCase()+id.slice(1));
+  if(!hdr||!body) return;
+  const isOpen=body.classList.toggle('open');
+  hdr.classList.toggle('open',isOpen);
+  saveLayout();
+}
+
 // ── DSL Panel ─────────────────────────────────────────────────────────────────
 function toggleDSL(){
-  const open=document.getElementById('dslPanel').classList.toggle('open');
-  document.getElementById('dslToggleBtn').classList.toggle('open',open);
+  const panel=document.getElementById('dslPanel');
+  const btn=document.getElementById('dslToggleBtn');
+  const open=panel.classList.toggle('open');
+  btn.textContent=open?'DSL ▴':'DSL ▾';
+  if(open) btn.style.background='rgba(188,140,255,.08)';
+  else btn.style.background='transparent';
 }
 
 function toggleExample(){
@@ -1104,59 +1423,140 @@ function toggleExample(){
   document.getElementById('exBody').classList.toggle('show');
 }
 
-// ── DSL Syntax Highlighting ───────────────────────────────────────────────────
-function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+// ── Auto Layout (Sugiyama-style layered) ──────────────────────────────────────
+// ── Undo / Redo ───────────────────────────────────────────────────────────────
+function snapshot(){
+  undoStack.push(JSON.stringify({
+    nodes:nodes.map(n=>({...n})),
+    edges:edges.map(e=>({...e})),
+    uid
+  }));
+  if(undoStack.length>50) undoStack.shift();
+  redoStack=[];
+  updateUndoUI();
+}
 
-function highlightDSLLine(line){
-  if(!line.trim()) return '\n';
-  if(line.trim().startsWith('#')) return `<span class="dh-comment">${escHtml(line)}</span>\n`;
+function restoreState(raw){
+  const s=JSON.parse(raw);
+  nodes=s.nodes;edges=s.edges;uid=s.uid;
+  selNode=null;selEdge=null;selectedNodes.clear();reconnectMode=null;connecting=null;
+  prevLine.attr('opacity',0);
+  document.getElementById('nodeEditSection').style.display='none';
+  document.getElementById('panelSel').classList.remove('show');
+  document.getElementById('panelConnect').classList.remove('show');
+  // Re-ensure markers for all edge types
+  edges.forEach(e=>ensureEType(e.type));
+  setMode('idle','MID/RIGHT DRAG PAN · SCROLL ZOOM · ALT+DRAG BOX SELECT · F FOCUS');
+  render();
+}
 
-  // Arrow: optional< optional_spaces dash optional_spaces (type) optional_spaces dash optional_spaces optional>
-  // We split the line on the arrow pattern
-  const arrowRe=/(<?\s*[-–]\s*\([^)]+\)\s*[-–]\s*>?)/;
-  const parts=line.split(arrowRe);
-  if(parts.length<3) return `<span class="dh-err">${escHtml(line)}</span>\n`;
+function undo(){
+  if(!undoStack.length) return;
+  redoStack.push(JSON.stringify({nodes:nodes.map(n=>({...n})),edges:edges.map(e=>({...e})),uid}));
+  restoreState(undoStack.pop());
+  updateUndoUI();
+}
 
-  const nodeA=parts[0];
-  const arrow=parts[1];
-  const nodeB=parts[2];
+function redo(){
+  if(!redoStack.length) return;
+  undoStack.push(JSON.stringify({nodes:nodes.map(n=>({...n})),edges:edges.map(e=>({...e})),uid}));
+  restoreState(redoStack.pop());
+  updateUndoUI();
+}
 
-  // Parse arrow internals
-  const am=arrow.match(/^(<)?\s*([-–])\s*\(([^)]+)\)\s*([-–])\s*(>)?$/);
-  let arrowHtml;
-  if(am){
-    const[,lt,d1,type,d2,rt]=am;
-    arrowHtml=`<span class="dh-tip">${escHtml(lt||'')}</span>`+
-      `<span class="dh-dash">${escHtml(d1)}</span>`+
-      `<span class="dh-paren">(</span><span class="dh-type">${escHtml(type)}</span><span class="dh-paren">)</span>`+
-      `<span class="dh-dash">${escHtml(d2)}</span>`+
-      `<span class="dh-tip">${escHtml(rt||'')}</span>`;
-  } else {
-    arrowHtml=`<span class="dh-dash">${escHtml(arrow)}</span>`;
+function updateUndoUI(){
+  document.getElementById('btnUndo').disabled=!undoStack.length;
+  document.getElementById('btnRedo').disabled=!redoStack.length;
+}
+
+// delNode without render (for batch ops)
+function delNodeSilent(id){
+  nodes=nodes.filter(n=>n.id!==id);
+  edges=edges.filter(e=>e.s!==id&&e.t!==id);
+  if(connecting?.nodeId===id){connecting=null;prevLine.attr('opacity',0);}
+  if(selEdge&&!edges.find(e=>e.id===selEdge)){selEdge=null;}
+}
+
+// ── Auto Layout (kind-row primary + barycenter horizontal) ────────────────────
+function autoLayout(){
+  if(!nodes.length) return;
+  snapshot();
+
+  // Primary layer = node kind (custom kinds map to 2 like impl)
+  const KIND_LAYER={tester:0,interface:1,impl:2,external:3};
+  const layer={};
+  nodes.forEach(n=>{layer[n.id]=KIND_LAYER[n.kind]??2;});
+
+  // Group by layer
+  const byLayer={};
+  nodes.forEach(n=>{
+    const l=layer[n.id];
+    (byLayer[l]||(byLayer[l]=[])).push(n);
+  });
+  const layerNums=Object.keys(byLayer).map(Number).sort((a,b)=>a-b);
+
+  // Initial order: alphabetical within each layer
+  layerNums.forEach(ln=>{
+    byLayer[ln].sort((a,b)=>a.name.localeCompare(b.name));
+  });
+
+  // Undirected adjacency for barycenter
+  const adj={};
+  nodes.forEach(n=>{adj[n.id]=[];});
+  edges.forEach(e=>{
+    if(layer[e.s]!==layer[e.t]){
+      adj[e.s].push(e.t);
+      adj[e.t].push(e.s);
+    }
+  });
+
+  // Barycenter heuristic — 6 passes alternating top-down / bottom-up
+  for(let pass=0;pass<6;pass++){
+    const layersOrdered=pass%2===0?[...layerNums]:[...layerNums].reverse();
+    layersOrdered.forEach(ln=>{
+      const arr=byLayer[ln];
+      // Assign current rank to each node
+      arr.forEach((n,i)=>{n._rank=i;});
+      arr.forEach(n=>{
+        const nbrs=adj[n.id];
+        if(!nbrs.length){n._bary=n._rank;return;}
+        let sum=0,cnt=0;
+        nbrs.forEach(id=>{
+          const nL=layer[id];
+          const peer=byLayer[nL]?.find(nd=>nd.id===id);
+          if(peer!=null){sum+=peer._rank??0;cnt++;}
+        });
+        n._bary=cnt?sum/cnt:n._rank;
+      });
+      arr.sort((a,b)=>a._bary-b._bary);
+      // Re-assign rank after sort
+      arr.forEach((n,i)=>{n._rank=i;});
+    });
   }
 
-  return `<span class="dh-node">${escHtml(nodeA.trimEnd())}</span>`+
-    (nodeA!==nodeA.trimEnd()?escHtml(nodeA.slice(nodeA.trimEnd().length)):'')+
-    arrowHtml+
-    `<span class="dh-node2">${escHtml(nodeB.trimStart())}</span>\n`;
+  // Position
+  const PAD_X=54,PAD_Y=72;
+  const STEP_X=NW+PAD_X,STEP_Y=NH+PAD_Y;
+  const W=mainEl.clientWidth;
+
+  layerNums.forEach((ln,li)=>{
+    const arr=byLayer[ln];
+    const totalW=arr.length*STEP_X-PAD_X;
+    const startX=W/2-totalW/2;
+    arr.forEach((n,i)=>{
+      n.x=startX+i*STEP_X;
+      n.y=80+li*STEP_Y;
+    });
+  });
+
+  render();
+  setTimeout(focusAll,80);
 }
 
-function updateDSLHighlight(){
-  const ta=document.getElementById('dslInput');
-  const hl=document.getElementById('dslHighlight');
-  const lines=ta.value.split('\n');
-  // Build highlighted HTML. Must end with extra line to match textarea scrollHeight
-  hl.innerHTML=lines.map(highlightDSLLine).join('')+' ';
-  hl.scrollTop=ta.scrollTop;hl.scrollLeft=ta.scrollLeft;
-}
+// ── DSL Syntax Highlighting ───────────────────────────────────────────────────
+function updateDSLHighlight(){/* no-op: plain colored textarea */}
 
 const dslInput=document.getElementById('dslInput');
-const dslHighlight=document.getElementById('dslHighlight');
-dslInput.addEventListener('input',updateDSLHighlight);
-dslInput.addEventListener('scroll',()=>{
-  dslHighlight.scrollTop=dslInput.scrollTop;
-  dslHighlight.scrollLeft=dslInput.scrollLeft;
-});
 dslInput.addEventListener('keydown',ev=>{
   // Allow Tab insertion
   if(ev.key==='Tab'){
@@ -1164,7 +1564,6 @@ dslInput.addEventListener('keydown',ev=>{
     const s=dslInput.selectionStart,e=dslInput.selectionEnd;
     dslInput.value=dslInput.value.slice(0,s)+'  '+dslInput.value.slice(e);
     dslInput.selectionStart=dslInput.selectionEnd=s+2;
-    updateDSLHighlight();
   }
 });
 
@@ -1179,7 +1578,8 @@ function guessKind(name){
 function parseDSL(replace){
   const text=dslInput.value.trim();
   if(!text) return;
-  if(replace) clearAll();
+  snapshot();
+  if(replace) clearAllSilent();
 
   const lines=text.split('\n').map(l=>l.trim()).filter(l=>l&&!l.startsWith('#'));
   const newNames=new Set(),newEdges=[];
@@ -1218,10 +1618,10 @@ function parseDSL(replace){
     edges.push({id:'e'+(++uid),s:s.id,t:t.id,type,headS,headT});
   });
 
-  render();setTimeout(focusAll,80);
+  render();
+  if(replace) setTimeout(autoLayout,20);
+  else setTimeout(focusAll,80);
 }
-
-// ── Export ────────────────────────────────────────────────────────────────────
 function openExportModal(){
   const m=document.getElementById('exportModal');
   m.style.display='flex';
@@ -1377,10 +1777,12 @@ document.getElementById('nNote').addEventListener('input',function(){
   this.style.height='auto';this.style.height=this.scrollHeight+'px';
 });
 
+
 // ── Add / clear ───────────────────────────────────────────────────────────────
 function addNode(){
   const name=document.getElementById('nName').value.trim();
   if(!name){flash('nName');return}
+  snapshot();
   const kind=document.getElementById('nKind').value;
   const note=document.getElementById('nNote').value.trim();
   const a=nodes.length*2.4,r=110+nodes.length*32;
@@ -1394,17 +1796,20 @@ function addNode(){
 function addEdgeManual(){
   const s=document.getElementById('eFrom').value,t=document.getElementById('eTo').value;
   if(!s||!t||s===t) return;
+  snapshot();
   ensureMarker(activeType);
   edges.push({id:'e'+(++uid),s,t,type:activeType,headS:false,headT:false});
   render();
 }
 
 function clearAll(){
-  nodes=[];edges=[];selEdge=null;connecting=null;reconnectMode=null;
+  if(nodes.length||edges.length) snapshot();
+  nodes=[];edges=[];selEdge=null;selNode=null;selectedNodes.clear();connecting=null;reconnectMode=null;
   prevLine.attr('opacity',0);
   document.getElementById('panelConnect').classList.remove('show');
   document.getElementById('panelSel').classList.remove('show');
-  setMode('idle','MID/RIGHT DRAG PAN · SCROLL ZOOM · HOVER NODE ◉ CONNECT · F FOCUS');
+  document.getElementById('nodeEditSection').style.display='none';
+  setMode('idle','MID/RIGHT DRAG PAN · SCROLL ZOOM · ALT+DRAG BOX SELECT · F FOCUS');
   render();
 }
 
@@ -1439,13 +1844,6 @@ function loadExample(){
   ].forEach(([s,t,sA,tA,type,headS,headT])=>{
     ensureMarker(type);edges.push({id:'e'+(++uid),s:id(s),t:id(t),sA,tA,type,headS,headT});
   });
-  dslInput.value=
-`HealthSystemTester-(uses)->IHealthSystem
-EntityStats-(implements)->IHealthSystem
-EntityStats <-(event)-> StackedHealthBar
-StackedHealthBar-(contains)->TMP_Text
-PlayerStats-(extends)->EntityStats`;
-  updateDSLHighlight();
   render();setTimeout(focusAll,80);
 }
 
@@ -1459,8 +1857,10 @@ document.querySelectorAll('input[name=expFmt]').forEach(r=>{
 });
 document.getElementById('pngOpts').style.display='none'; // default to SVG
 
+loadLayout();
 render();
-updateDSLHighlight();
+updateUndoUI();
+
 </script>
 </body>
 </html>

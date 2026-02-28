@@ -254,26 +254,86 @@ footer a:hover { color:var(--blue); }
 
 <script>
 const TOOLS = [
-  { name:"Dependency Graph",   path:"graph/",       icon:"◈",  ac:"var(--blue)",   status:"ready",
-    tags:["visualizer","d3","architecture","graph","svg","unity"] },
-  { name:"Markdown Viewer",    path:"markdown/",    icon:"📝", ac:"var(--green)",  status:"soon",
-    tags:["viewer","markdown","docs","readme","gdd"] },
-  { name:"README Viewer",      path:"readme/",      icon:"📖", ac:"var(--cyan)",   status:"soon",
-    tags:["viewer","readme","markdown","docs","text"] },
-  { name:"Decrypt Text",       path:"decrypt/",     icon:"🔐", ac:"var(--purple)", status:"soon",
-    tags:["text","cipher","base64","xor","encode","decode"] },
-  { name:"Color Converter",    path:"color/",       icon:"🎨", ac:"var(--amber)",  status:"soon",
-    tags:["color","unity","hex","color32","hsv","visualizer"] },
-  { name:"Sprint Timer",       path:"timer/",       icon:"⏱", ac:"var(--teal)",   status:"soon",
-    tags:["productivity","pomodoro","timer","focus"] },
-  { name:"Spritesheet Viewer", path:"spritesheet/", icon:"🖼", ac:"var(--pink)",   status:"planned",
-    tags:["visualizer","sprite","animation","unity","texture"] },
-  { name:"Dice & RNG",         path:"rng/",         icon:"🎲", ac:"var(--red)",    status:"planned",
-    tags:["balance","probability","loot","rng","game-design"] },
-  { name:"Stat Curve Editor",  path:"statcurve/",   icon:"📐", ac:"var(--red)",    status:"planned",
-    tags:["balance","curve","xp","level","game-design","unity"] },
-  { name:"Scratchpad",         path:"notes/",       icon:"📋", ac:"var(--muted)",  status:"planned",
-    tags:["text","notes","productivity","quick"] },
+    {
+        name: "Dependency Graph",
+        path: "graph/",
+        icon: "◈",
+        ac: "var(--blue)",
+        status: "ready",
+        tags: ["visualizer", "d3", "architecture", "graph", "svg", "unity"]
+    },
+    {
+        name: "Markdown Viewer",
+        path: "markdown/",
+        icon: "📝",
+        ac: "var(--green)",
+        status: "soon",
+        tags: ["viewer", "markdown", "docs", "readme", "gdd"]
+    },
+    {
+        name: "README Viewer",
+        path: "readme/",
+        icon: "📖",
+        ac: "var(--cyan)",
+        status: "soon",
+        tags: ["viewer", "readme", "markdown", "docs", "text"]
+    },
+    {
+        name: "Decrypt Text",
+        path: "decrypt/",
+        icon: "🔐",
+        ac: "var(--purple)",
+        status: "soon",
+        tags: ["text", "cipher", "base64", "xor", "encode", "decode"]
+    },
+    {
+        name: "Color Converter",
+        path: "color/",
+        icon: "🎨",
+        ac: "var(--amber)",
+        status: "soon",
+        tags: ["color", "unity", "hex", "color32", "hsv", "visualizer"]
+    },
+    {
+        name: "Sprint Timer",
+        path: "timer/",
+        icon: "⏱",
+        ac: "var(--teal)",
+        status: "soon",
+        tags: ["productivity", "pomodoro", "timer", "focus"]
+    },
+    {
+        name: "Spritesheet Viewer",
+        path: "spritesheet/",
+        icon: "🖼",
+        ac: "var(--pink)",
+        status: "planned",
+        tags: ["visualizer", "sprite", "animation", "unity", "texture"]
+    },
+    {
+        name: "Dice & RNG",
+        path: "rng/",
+        icon: "🎲",
+        ac: "var(--red)",
+        status: "planned",
+        tags: ["balance", "probability", "loot", "rng", "game-design"]
+    },
+    {
+        name: "Stat Curve Editor",
+        path: "statcurve/",
+        icon: "📐",
+        ac: "var(--red)",
+        status: "planned",
+        tags: ["balance", "curve", "xp", "level", "game-design", "unity"]
+    },
+    {
+        name: "Scratchpad",
+        path: "notes/",
+        icon: "📋",
+        ac: "var(--muted)",
+        status: "planned",
+        tags: ["text", "notes", "productivity", "quick"]
+    },
 ];
 
 // unique tag list — only from tags that appear across all tools
