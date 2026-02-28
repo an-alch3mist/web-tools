@@ -187,7 +187,7 @@ main{position:relative;overflow:hidden;
   height:340px;min-height:120px;max-height:80vh;
   background:var(--panel);border-top:1px solid var(--border);
   display:flex;flex-direction:row;gap:0;
-  transform:translateY(calc(100% + 1px));
+  transform:translateY(calc(100% + 40px));
   transition:transform .22s ease;
   z-index:15;
 }
@@ -339,18 +339,36 @@ textarea.dsl:focus{border-color:var(--purple)}
   font-size:11px;color:var(--muted);
 }
 #layoutItersWrap.show{display:flex;}
-#layoutIters,#layoutSpringK{
+#layoutIters,#layoutInitDist,#layoutInitIters,
+#layoutRepulsion,#layoutAttraction,
+#layoutDamp,#layoutMinDist,#layoutMaxMove,#layoutGravity{
   font-family:'JetBrains Mono',monospace;font-size:11px;
   padding:4px 6px;border-radius:5px;
   border:1px solid rgba(188,140,255,.4);background:transparent;color:var(--purple);
   outline:none;text-align:center;
   -moz-appearance:textfield;
 }
-#layoutIters{width:58px;}
-#layoutSpringK{width:46px;}
+#layoutIters{width:54px;}
+#layoutInitDist{width:36px;}
+#layoutInitIters{width:36px;}
+#layoutRepulsion{width:44px;}
+#layoutAttraction{width:44px;}
+#layoutDamp{width:36px;}
+#layoutMinDist{width:36px;}
+#layoutMaxMove{width:36px;}
+#layoutGravity{width:36px;}
 #layoutIters::-webkit-inner-spin-button,#layoutIters::-webkit-outer-spin-button,
-#layoutSpringK::-webkit-inner-spin-button,#layoutSpringK::-webkit-outer-spin-button{-webkit-appearance:none}
-#layoutIters:focus,#layoutSpringK:focus{border-color:var(--purple);}
+#layoutInitDist::-webkit-inner-spin-button,#layoutInitDist::-webkit-outer-spin-button,
+#layoutInitIters::-webkit-inner-spin-button,#layoutInitIters::-webkit-outer-spin-button,
+#layoutRepulsion::-webkit-inner-spin-button,#layoutRepulsion::-webkit-outer-spin-button,
+#layoutAttraction::-webkit-inner-spin-button,#layoutAttraction::-webkit-outer-spin-button,
+#layoutDamp::-webkit-inner-spin-button,#layoutDamp::-webkit-outer-spin-button,
+#layoutMinDist::-webkit-inner-spin-button,#layoutMinDist::-webkit-outer-spin-button,
+#layoutMaxMove::-webkit-inner-spin-button,#layoutMaxMove::-webkit-outer-spin-button,
+#layoutGravity::-webkit-inner-spin-button,#layoutGravity::-webkit-outer-spin-button{-webkit-appearance:none}
+#layoutIters:focus,#layoutInitDist:focus,#layoutInitIters:focus,
+#layoutRepulsion:focus,#layoutAttraction:focus,
+#layoutDamp:focus,#layoutMinDist:focus,#layoutMaxMove:focus,#layoutGravity:focus{border-color:var(--purple);}
 #layoutItersWrap .lbl-sep{width:1px;height:14px;background:rgba(188,140,255,.2);margin:0 2px;}
 /* progress ring shown while spring is running */
 #layoutProgress{
@@ -391,11 +409,32 @@ body.resizing{user-select:none}
     <button class="hbtn focus" onclick="focusAll()">Focus ⌖ (F)</button>
     <select id="layoutAlgoSel" title="Auto Layout algorithm" onchange="onLayoutAlgoChange()"></select>
     <span id="layoutItersWrap" title="Spring simulation parameters">
-      <span>iters</span>
-      <input id="layoutIters" type="number" value="300" min="50" max="5000" step="50" title="Physics iterations"/>
+      <span title="Total physics iterations">iters</span>
+      <input id="layoutIters" type="number" value="5000" min="50" max="10000" step="50" title="Total animation iterations"/>
       <span class="lbl-sep"></span>
-      <span title="Spring rest-length multiplier — higher = more spacing between connected nodes">K</span>
-      <input id="layoutSpringK" type="number" value="2.2" min="0.5" max="10" step="0.1" title="Spring constant (rest-length × node size). Higher = more distance between connected nodes."/>
+      <span title="initial_dist_from_worldCenter — spawn radius (× node size). Nodes start on a ring at this distance from canvas centre.">initD</span>
+      <input id="layoutInitDist" type="number" value="5" min="0.5" max="20" step="0.5" title="Initial scatter radius (× node diagonal). Mirrors: initial_dist_from_worldCenter"/>
+      <span class="lbl-sep"></span>
+      <span title="init_iter_UpdateDistribute — warm-up steps run synchronously before animation. Gives the graph a head start.">warmup</span>
+      <input id="layoutInitIters" type="number" value="10" min="0" max="200" step="1" title="Synchronous warm-up iterations. Mirrors: init_iter_UpdateDistribute"/>
+      <span class="lbl-sep"></span>
+      <span title="repulsionStrength — all-pairs repulsion coefficient. Higher = nodes push apart faster / reach stable alignment sooner.">rep</span>
+      <input id="layoutRepulsion" type="number" value="0.07" min="0.005" max="1" step="0.005" title="Repulsion coefficient. Mirrors: repulsionStrength"/>
+      <span class="lbl-sep"></span>
+      <span title="attractionStrength — Hooke spring stiffness for connected-node pairs only.">att</span>
+      <input id="layoutAttraction" type="number" value="0.03" min="0.001" max="0.5" step="0.001" title="Attraction spring stiffness. Mirrors: attractionStrength"/>
+      <span class="lbl-sep"></span>
+      <span title="dampingFactor — Higher = faster settle (Unity semantics). At 4 nodes settle quickly; at 1 they bounce longer.">damp</span>
+      <input id="layoutDamp" type="number" value="2" min="0.1" max="20" step="0.1" title="Velocity damping. Higher = quicker settle. Mirrors: dampingFactor"/>
+      <span class="lbl-sep"></span>
+      <span title="minDistance — hard separation floor (× node size). Nodes closer than this get a strong push-apart force.">minD</span>
+      <input id="layoutMinDist" type="number" value="0.7" min="0.1" max="1.5" step="0.1" title="Minimum node separation (× node diagonal). Mirrors: minDistance"/>
+      <span class="lbl-sep"></span>
+      <span title="maxMovement — per-step velocity clamp (× node size). Prevents explosion or jitter on first frames.">maxMv</span>
+      <input id="layoutMaxMove" type="number" value="0.5" min="0.05" max="10" step="0.05" title="Max velocity per step (× node diagonal). Mirrors: maxMovement"/>
+      <span class="lbl-sep"></span>
+      <span title="gravityStrength — pull toward canvas centre. Also scales the strata-band pull in Y-Strata mode.">grav</span>
+      <input id="layoutGravity" type="number" value="1" min="0" max="10" step="0.1" title="Gravity toward canvas centre. Mirrors: gravityStrength"/>
     </span>
     <span id="layoutProgress"><span id="springRing"></span><span id="layoutProgressTxt"></span></span>
     <button class="hbtn" id="btnAutoLayout" onclick="runAutoLayout()" style="border-color:rgba(188,140,255,.4);color:var(--purple)" onmouseenter="this.style.background='rgba(188,140,255,.1)'" onmouseleave="this.style.background=''">Auto Layout</button>
@@ -434,11 +473,11 @@ body.resizing{user-select:none}
 
   <hr/>
 
-  <!-- ── Add Edge (collapsible) ── -->
+  <!-- ── Edge Type (collapsible) ── -->
   <div class="sec">
     <div class="coll-hdr open" onclick="toggleColl('addEdge')" id="hdrAddEdge">
       <span class="coll-arrow">▶</span>
-      <span class="coll-label">Add Edge</span>
+      <span class="coll-label">Edge Type</span>
     </div>
     <div class="coll-body open" id="bodyAddEdge" style="padding-top:8px">
       <!-- Edge Type -->
@@ -446,9 +485,6 @@ body.resizing{user-select:none}
         <label style="margin-bottom:5px">Type <span style="color:var(--dim);font-size:9px;letter-spacing:1px">1-7 KEY</span></label>
         <div class="etype-pills" id="etypePills"></div>
       </div>
-      <div class="field"><label>From</label><select id="eFrom"><option value="">— node —</option></select></div>
-      <div class="field"><label>To</label><select id="eTo"><option value="">— node —</option></select></div>
-      <button class="btn btn-edge" onclick="addEdgeManual()">+ Add Edge</button>
       <div style="margin-top:9px;font-size:10.5px;color:var(--dim);line-height:2">
         Hover node → anchors ◉ appear<br>
         Click ◉ src → click ◉ target<br>
@@ -468,6 +504,8 @@ body.resizing{user-select:none}
 
   <div class="info-panel info-sel" id="panelSel">
     Edge: <strong id="selLabel">—</strong>
+    <div style="margin-top:6px;margin-bottom:2px;font-size:9.5px;color:var(--dim);letter-spacing:1px;text-transform:uppercase">Change Type</div>
+    <div class="etype-pills" id="edgeSelTypePills" style="margin-bottom:6px"></div>
     <div class="sel-controls">
       <button class="sel-btn head" id="btnHeadS" onclick="toggleHead('s')">← head</button>
       <button class="sel-btn head" id="btnHeadT" onclick="toggleHead('t')">head →</button>
@@ -574,7 +612,7 @@ NodeA &lt;-(type)- NodeB   reverse"></textarea>
     <div class="leg-grp" id="legKinds"></div>
   </div>
 
-  <div id="modebar">MID/RIGHT DRAG PAN · SCROLL ZOOM · ALT+DRAG BOX SELECT · F FOCUS · CTRL+Z UNDO</div>
+  <div id="modebar">MID/RIGHT DRAG PAN · SCROLL ZOOM · ALT+DRAG BOX SELECT · CTRL+CLICK MULTI-SELECT · F FOCUS · CTRL+Z UNDO</div>
 
   <div id="empty">
     <div class="big">◈</div>
@@ -649,8 +687,11 @@ let activeType='implements';
 let tipFrozen=false;
 let editingNodeId=null;
 let selectedNodes=new Set(); // multi-select set of node ids
-let boxSel=null;             // {x0,y0,x1,y1} in SVG root coords, or null
+let boxSel=null;             // active box-select drag state, or null
+let _boxSelConsumed=false;   // suppress click.bg immediately after a box-select
 let undoStack=[],redoStack=[];
+
+const IDLE_HINT='MID/RIGHT DRAG PAN · SCROLL ZOOM · ALT+DRAG BOX SELECT · CTRL+CLICK MULTI-SELECT · F FOCUS · CTRL+Z UNDO';
 
 // ── SVG setup ─────────────────────────────────────────────────────────────────
 const mainEl=document.getElementById('mainEl');
@@ -817,6 +858,7 @@ function renderEdges(){
     const mStart=(e.headS)?`url(#ms-${e.type}${isSel?'-s':''})`:'none';
 
     g.select('.gedge-vis').attr('d',path)
+      .attr('fill','none')
       .attr('stroke',isSel?'#e6edf3':es.color)
       .attr('stroke-width',isSel?2:1.5)
       .attr('stroke-dasharray',isSel?null:es.dash)
@@ -879,45 +921,31 @@ function renderNodes(){
                   &&!ev.target.classList.contains('nx-bg'))
       .on('start',function(ev,d){
         if(connecting) return;
-        d3.select(this).raise();tipFrozen=true;
-        // Add to multi-select if Shift held, otherwise normal single select
-        if(ev.sourceEvent?.shiftKey){
-          selectedNodes.add(d.id);
-          render();
+        d3.select(this).raise();
+        tipFrozen=true;
+        // Ctrl/Cmd held → let click handle the toggle; don't change selection on mousedown
+        if(ev.sourceEvent?.ctrlKey||ev.sourceEvent?.metaKey) return;
+        // Node already in selection → keep group; just make it the primary for edit panel
+        if(selectedNodes.has(d.id)){
+          if(selNode!==d.id){ selNode=d.id; updateNodeEditPanel(false); }
           return;
         }
-        // If dragging a node not in multi-select, clear multi and select it
-        if(!selectedNodes.has(d.id)) selectedNodes.clear();
-        if(selNode!==d.id){
-          selNode=d.id;
-          selEdge=null;
-          const n=d;
-          document.getElementById('selNodeName').value=n.name;
-          document.getElementById('selNodeKind').value=n.kind;
-          document.getElementById('selNodeBadge').textContent=n.name.length>12?n.name.slice(0,11)+'…':n.name;
-          const ta=document.getElementById('selNodeNote');
-          ta.value=n.note||'';ta.style.height='auto';ta.style.height=ta.scrollHeight+'px';
-          document.getElementById('nodeEditSection').style.display='block';
-          document.getElementById('bodySelNode').classList.add('open');
-          document.getElementById('hdrSelNode').classList.add('open');
-          document.getElementById('panelSel').classList.remove('show');
-          document.getElementById('panelConnect').classList.remove('show');
-          setMode('idle','NODE SELECTED · EDIT IN PANEL · ESC DESELECT');
-          nodeLayer.selectAll('.gnode').each(function(nd){
-            const isSrc=connecting?.nodeId===nd.id;
-            const isSelN=nd.id===selNode;
-            const k=KINDS[nd.kind]||KINDS.impl;
-            d3.select(this).select('.bd').attr('stroke',isSrc?'#e6edf3':isSelN?'#f78166':k.stroke).attr('stroke-width',isSrc||isSelN?2:1.5);
-          });
-        }
+        // Not selected → select only this node
+        selectedNodes.clear();
+        selectedNodes.add(d.id);
+        selNode=d.id; selEdge=null;
+        updateNodeEditPanel(true);
+        updateSelModeBar();
+        render();
       })
       .on('drag',function(ev,d){
         if(connecting) return;
-        if(selectedNodes.size>1 && selectedNodes.has(d.id)){
-          // Move all selected nodes together
+        if(selectedNodes.has(d.id)){
+          // Move all selected nodes together (even if only 1)
+          const dx=ev.dx, dy=ev.dy;
           selectedNodes.forEach(id=>{
             const n=nodes.find(n=>n.id===id);
-            if(n){n.x+=ev.dx;n.y+=ev.dy;}
+            if(n){n.x+=dx;n.y+=dy;}
           });
           nodeLayer.selectAll('.gnode').filter(nd=>selectedNodes.has(nd.id))
             .attr('transform',nd=>`translate(${nd.x},${nd.y})`);
@@ -927,7 +955,7 @@ function renderNodes(){
         }
         renderEdges();renderEdgeHandles();
       })
-      .on('end',function(ev,d){
+      .on('end',function(){
         tipFrozen=false;
         snapshot();
       })
@@ -948,14 +976,40 @@ function renderNodes(){
   // Glow
   en.append('rect').attr('class','gl')
     .attr('x',-2).attr('y',-2).attr('width',NW+4).attr('height',NH+4).attr('rx',8).attr('opacity',.07);
-  // Body — click selects node
+
+  // Body
   en.append('rect').attr('class','bd').attr('width',NW).attr('height',NH).attr('rx',6)
     .on('click',(ev,d)=>{
-      if(ev.defaultPrevented) return;
+      if(ev.defaultPrevented) return; // drag occurred — skip
       ev.stopPropagation();
       if(connecting) return;
-      clickNode(d.id);
+
+      if(ev.ctrlKey||ev.metaKey){
+        // Ctrl/Cmd+click: toggle this node in/out of selection
+        if(selectedNodes.has(d.id)){
+          selectedNodes.delete(d.id);
+          if(selNode===d.id) selNode=selectedNodes.size?[...selectedNodes].at(-1):null;
+        } else {
+          selectedNodes.add(d.id);
+          selNode=d.id; selEdge=null;
+        }
+        if(selNode) updateNodeEditPanel(true);
+        else hideNodeEditPanel();
+        updateSelModeBar();
+        render();
+        return;
+      }
+
+      // Plain click → single-select this node
+      // (drag.start already selected it; this just confirms + deselects others)
+      selectedNodes.clear();
+      selectedNodes.add(d.id);
+      selNode=d.id; selEdge=null;
+      updateNodeEditPanel(true);
+      setMode('idle',`1 NODE SELECTED · CTRL+CLICK ADD · DRAG MOVE · ESC DESELECT`);
+      render();
     });
+
   // Badge
   en.append('rect').attr('class','bbg');
   en.append('text').attr('class','btxt').attr('pointer-events','none');
@@ -963,7 +1017,7 @@ function renderNodes(){
   en.append('text').attr('class','ntit').attr('pointer-events','none');
   en.append('text').attr('class','nknd').attr('pointer-events','none');
 
-  // Delete btn (circle hit + × text)
+  // Delete btn
   en.append('circle').attr('class','nx-bg')
     .attr('cx',NW-10).attr('cy',10).attr('r',8)
     .attr('fill','transparent').attr('cursor','pointer')
@@ -981,7 +1035,7 @@ function renderNodes(){
     .attr('x',NW-10).attr('y',14.5).attr('text-anchor','middle')
     .attr('fill','#3d444d').attr('font-size',12).attr('pointer-events','none').text('×');
 
-  // Name dblclick edit target — NO mousedown stopPropagation so drag works
+  // Name dblclick edit target
   en.append('rect').attr('class','name-edit-hit')
     .attr('x',8).attr('y',13).attr('width',NW-26).attr('height',20)
     .attr('fill','transparent').attr('cursor','default')
@@ -1009,25 +1063,29 @@ function renderNodes(){
     const g=d3.select(this);
     const isSrc=connecting?.nodeId===d.id;
     const isSelN=d.id===selNode;
-    const isMulti=selectedNodes.has(d.id)&&!isSelN;
+    const isInSel=selectedNodes.has(d.id);
 
-    // multi-select CSS class
-    g.classed('multi-sel',isMulti);
-
+    // Blue multi-sel ring for any selected node; red for the primary editable one
+    g.classed('multi-sel',isInSel&&!isSelN);
     g.select('.gl').attr('fill',k.stroke);
-    g.select('.bd').attr('fill',k.fill).attr('stroke',isSrc?'#e6edf3':isSelN?'#f78166':k.stroke).attr('stroke-width',isSrc||isSelN?2:1.5);
+    g.select('.bd').attr('fill',k.fill)
+      .attr('stroke',isSrc?'#e6edf3':isSelN?'#f78166':isInSel?'#58a6ff':k.stroke)
+      .attr('stroke-width',isSrc||isSelN||isInSel?2:1.5);
 
     const bl=k.label.length*6+10;
     g.select('.bbg').attr('x',7).attr('y',-9).attr('width',bl).attr('height',14).attr('rx',3)
       .attr('fill',k.fill).attr('stroke',k.stroke).attr('stroke-width',1);
-    g.select('.btxt').attr('x',12).attr('y',1).attr('fill',k.stroke).attr('font-size',7.5).attr('font-weight',700).text(k.label);
+    g.select('.btxt').attr('x',12).attr('y',1).attr('fill',k.stroke).attr('font-size',7.5)
+      .attr('font-weight',700).attr('font-family','JetBrains Mono,monospace').text(k.label);
 
     g.select('.ntit').attr('x',NW/2).attr('y',26).attr('text-anchor','middle')
       .attr('fill','#e6edf3').attr('font-size',11).attr('font-weight',700)
+      .attr('font-family','JetBrains Mono,monospace')
       .text(d.name.length>21?d.name.slice(0,19)+'…':d.name);
 
     g.select('.nknd').attr('x',NW/2).attr('y',42).attr('text-anchor','middle')
-      .attr('fill',k.stroke).attr('font-size',8).attr('opacity',.5).text(k.label);
+      .attr('fill',k.stroke).attr('font-size',8).attr('opacity',.5)
+      .attr('font-family','JetBrains Mono,monospace').text(k.label);
 
     g.selectAll('.anchor').attr('fill',k.stroke).attr('fill-opacity',.25).attr('stroke',k.stroke).attr('stroke-width',1.5);
     if(isSrc){
@@ -1114,7 +1172,7 @@ function onAnchorClick(d,side){
 function cancelConnect(doRender=true){
   connecting=null;prevLine.attr('opacity',0);
   document.getElementById('panelConnect').classList.remove('show');
-  setMode('idle','MID/RIGHT DRAG PAN · SCROLL ZOOM · ALT+DRAG BOX SELECT · F FOCUS');
+  setMode('idle',IDLE_HINT);
   if(doRender) render();
 }
 
@@ -1128,11 +1186,42 @@ function clickEdge(id){
     document.getElementById('selLabel').textContent=e?.type?.replace(/_/g,' ')||'—';
     document.getElementById('panelSel').classList.add('show');
     updateHeadButtons(e);
+    updateEdgeSelTypePills(e);
     setMode('selected','EDGE SELECTED · DEL DELETE · ESC DESELECT');
   } else {
     document.getElementById('panelSel').classList.remove('show');
-    setMode('idle','MID/RIGHT DRAG PAN · SCROLL ZOOM · ALT+DRAG BOX SELECT · F FOCUS');
+    setMode('idle',IDLE_HINT);
   }
+  render();
+}
+
+function updateEdgeSelTypePills(e){
+  const container=document.getElementById('edgeSelTypePills');
+  container.innerHTML='';
+  if(!e) return;
+  Object.entries(ETYPES).forEach(([type,s])=>{
+    const b=document.createElement('button');
+    const on=type===e.type;
+    b.className='epill'+(on?' on':'');
+    b.textContent=type.replace(/_/g,' ');
+    b.dataset.type=type;
+    b.style.borderColor=s.color;
+    b.style.color=on?'#0d1117':s.color;
+    if(on)b.style.background=s.color;
+    b.onclick=()=>changeEdgeType(type);
+    container.appendChild(b);
+  });
+}
+
+function changeEdgeType(type){
+  if(!selEdge) return;
+  const e=edges.find(e=>e.id===selEdge);
+  if(!e||e.type===type) return;
+  snapshot();
+  ensureEType(type);
+  e.type=type;
+  document.getElementById('selLabel').textContent=type.replace(/_/g,' ');
+  updateEdgeSelTypePills(e);
   render();
 }
 
@@ -1161,8 +1250,7 @@ function startReconnect(end){
 function updateReconnectUI(){
   document.getElementById('btnMoveS').classList.toggle('reconnecting',reconnectMode?.end==='s');
   document.getElementById('btnMoveT').classList.toggle('reconnecting',reconnectMode?.end==='t');
-  if(!reconnectMode&&selEdge) setMode('selected','EDGE SELECTED · DEL DELETE · ESC DESELECT');
-}
+  if(!reconnectMode&&selEdge) setMode('selected','EDGE SELECTED · DEL DELETE · ESC DESELECT');}
 
 function delEdge(id){
   snapshot();
@@ -1170,7 +1258,7 @@ function delEdge(id){
   if(selEdge===id){
     selEdge=null;reconnectMode=null;
     document.getElementById('panelSel').classList.remove('show');
-    setMode('idle','MID/RIGHT DRAG PAN · SCROLL ZOOM · ALT+DRAG BOX SELECT · F FOCUS');
+    setMode('idle',IDLE_HINT);
   }
   render();
 }
@@ -1200,56 +1288,74 @@ svg.on('mousemove.prev',function(ev){
 });
 
 // ── Box-select ────────────────────────────────────────────────────────────────
+
+/** Convert screen clientX/Y → root-group local coords, honouring d3 zoom. */
+function screenToRoot(clientX, clientY){
+  const t=d3.zoomTransform(svgEl);
+  const r=svgEl.getBoundingClientRect();
+  return [(clientX-r.left-t.x)/t.k, (clientY-r.top-t.y)/t.k];
+}
+
 svg.on('mousedown.boxsel',function(ev){
   if(!ev.altKey||ev.button!==0) return;
   if(connecting||reconnectMode) return;
-  ev.preventDefault();ev.stopPropagation();
-  const[mx,my]=d3.pointer(ev,root.node());
+  ev.preventDefault(); ev.stopPropagation();
+  const[mx,my]=screenToRoot(ev.clientX,ev.clientY);
   boxSel={x0:mx,y0:my,x1:mx,y1:my};
   d3.select('#boxRect').attr('display',null).attr('x',mx).attr('y',my).attr('width',0).attr('height',0);
-  setMode('idle','BOX SELECT — DRAG TO SELECT NODES · RELEASE TO CONFIRM');
+  setMode('idle','BOX SELECT — DRAG TO INCLUDE NODES · RELEASE TO CONFIRM · ALT+DRAG');
 });
 
-svg.on('mousemove.boxsel',function(ev){
+// Use window-level move/up so the selection completes even when pointer leaves SVG
+function _boxSelMove(ev){
   if(!boxSel) return;
-  const[mx,my]=d3.pointer(ev,root.node());
-  boxSel.x1=mx;boxSel.y1=my;
+  const[mx,my]=screenToRoot(ev.clientX,ev.clientY);
+  boxSel.x1=mx; boxSel.y1=my;
   const x=Math.min(boxSel.x0,mx),y=Math.min(boxSel.y0,my);
-  const w=Math.abs(mx-boxSel.x0),h=Math.abs(my-boxSel.y0);
-  d3.select('#boxRect').attr('x',x).attr('y',y).attr('width',w).attr('height',h);
-});
-
-svg.on('mouseup.boxsel',function(ev){
-  if(!boxSel) return;
+  d3.select('#boxRect').attr('x',x).attr('y',y)
+    .attr('width',Math.abs(mx-boxSel.x0)).attr('height',Math.abs(my-boxSel.y0));
+}
+function _boxSelUp(ev){
+  if(!boxSel||ev.button!==0) return;
+  const[mx,my]=screenToRoot(ev.clientX,ev.clientY);
+  boxSel.x1=mx; boxSel.y1=my;
   const x0=Math.min(boxSel.x0,boxSel.x1),x1=Math.max(boxSel.x0,boxSel.x1);
   const y0=Math.min(boxSel.y0,boxSel.y1),y1=Math.max(boxSel.y0,boxSel.y1);
+  boxSel=null;
+  d3.select('#boxRect').attr('display','none');
+
   const newSel=new Set();
   nodes.forEach(n=>{
-    const cx=n.x+NW/2,cy=n.y+NH/2;
+    const cx=n.x+NW/2, cy=n.y+NH/2;
     if(cx>=x0&&cx<=x1&&cy>=y0&&cy<=y1) newSel.add(n.id);
   });
   selectedNodes=newSel;
-  boxSel=null;
-  d3.select('#boxRect').attr('display','none');
-  if(newSel.size>0){
-    selNode=null;
-    document.getElementById('nodeEditSection').style.display='none';
-    setMode('idle',`${newSel.size} NODE${newSel.size>1?'S':''} SELECTED · DRAG TO MOVE · DEL DELETE · ESC CLEAR`);
-  } else {
-    setMode('idle','MID/RIGHT DRAG PAN · SCROLL ZOOM · ALT+DRAG BOX SELECT · F FOCUS');
-  }
+  // Set primary to the last item (arbitrary but deterministic)
+  selNode=newSel.size?[...newSel].at(-1):null;
+  if(selNode) updateNodeEditPanel(false); // don't force-expand the panel
+  else hideNodeEditPanel();
+  updateSelModeBar();
+  // Suppress the click.bg that fires right after mouseup — it would clear selection
+  if(newSel.size>0) _boxSelConsumed=true;
   render();
-});
+}
+window.addEventListener('mousemove',_boxSelMove);
+window.addEventListener('mouseup',_boxSelUp);
 
 svg.on('click.bg',function(ev){
+  // If we just finished a box-select, the click fires right after mouseup — ignore it
+  if(_boxSelConsumed){_boxSelConsumed=false;return;}
   const tgt=ev.target;
   if(tgt===svgEl||tgt.id==='root'||tgt.id==='EL'||tgt.id==='NL'){
     if(connecting){cancelConnect();return}
     if(reconnectMode){reconnectMode=null;updateReconnectUI();render();return}
     if(selEdge){clickEdge(null);return}
-    if(selNode){clickNode(null);return}
-    if(selectedNodes.size){selectedNodes.clear();render();
-      setMode('idle','MID/RIGHT DRAG PAN · SCROLL ZOOM · ALT+DRAG BOX SELECT · F FOCUS');return}
+    if(selNode||selectedNodes.size){
+      selNode=null; selectedNodes.clear();
+      hideNodeEditPanel();
+      setMode('idle',IDLE_HINT);
+      render();return
+    }
   }
 });
 
@@ -1264,22 +1370,23 @@ document.addEventListener('keydown',ev=>{
     if(reconnectMode){reconnectMode=null;updateReconnectUI();render();return}
     if(connecting){cancelConnect();return}
     if(selEdge){clickEdge(null);return}
-    if(selNode){clickNode(null);return}
-    if(selectedNodes.size){selectedNodes.clear();render();
-      setMode('idle','MID/RIGHT DRAG PAN · SCROLL ZOOM · ALT+DRAG BOX SELECT · F FOCUS');return}
+    if(selNode||selectedNodes.size){
+      selNode=null; selectedNodes.clear(); hideNodeEditPanel();
+      setMode('idle',IDLE_HINT); render(); return;
+    }
   }
   // Delete selected nodes or edge
   if(ev.key==='Delete'||ev.key==='Backspace'){
-    if(selectedNodes.size){snapshot();[...selectedNodes].forEach(id=>delNodeSilent(id));selectedNodes.clear();render();return}
+    if(selectedNodes.size){snapshot();[...selectedNodes].forEach(id=>delNodeSilent(id));selectedNodes.clear();selNode=null;hideNodeEditPanel();setMode('idle',IDLE_HINT);render();return}
     if(selEdge){delEdge(selEdge);return}
     if(selNode){delNode(selNode);return}
   }
   // A = select all
   if(ev.key==='a'&&!ev.ctrlKey&&!ev.metaKey){
     selectedNodes=new Set(nodes.map(n=>n.id));
-    selNode=null;document.getElementById('nodeEditSection').style.display='none';
-    setMode('idle',`${selectedNodes.size} NODES SELECTED · DRAG TO MOVE · DEL DELETE · ESC CLEAR`);
-    render();return;
+    selNode=selectedNodes.size?[...selectedNodes].at(-1):null;
+    if(selNode) updateNodeEditPanel(false); else hideNodeEditPanel();
+    updateSelModeBar(); render(); return;
   }
   if(ev.key.toLowerCase()==='f'&&!ev.ctrlKey&&!ev.metaKey){focusAll();return}
   const types=Object.keys(ETYPES);
@@ -1353,35 +1460,62 @@ function setMode(cls,txt){
   });
 })();
 
-function clickNode(id){
-  selNode=(selNode===id)?null:id;
+// ── Selection helpers ────────────────────────────────────────────────────────
+let _nodeEditSnapshotted=false;
+
+function updateNodeEditPanel(reopenCollapsible){
   _nodeEditSnapshotted=false;
-  selectedNodes.clear();
-  selEdge=null;connecting=null;prevLine.attr('opacity',0);
-  document.getElementById('panelConnect').classList.remove('show');
-  document.getElementById('panelSel').classList.remove('show');
-  document.getElementById('infoPanelSep').style.display='none';
   const section=document.getElementById('nodeEditSection');
+  document.getElementById('panelSel').classList.remove('show');
+  document.getElementById('panelConnect').classList.remove('show');
+  document.getElementById('infoPanelSep').style.display='none';
   if(selNode){
     const n=nodes.find(n=>n.id===selNode);
+    if(!n){ section.style.display='none'; return; }
     document.getElementById('selNodeName').value=n.name;
     document.getElementById('selNodeKind').value=n.kind;
     document.getElementById('selNodeBadge').textContent=n.name.length>12?n.name.slice(0,11)+'…':n.name;
     const ta=document.getElementById('selNodeNote');
     ta.value=n.note||'';ta.style.height='auto';ta.style.height=ta.scrollHeight+'px';
     section.style.display='block';
-    // ensure body is open
-    document.getElementById('bodySelNode').classList.add('open');
-    document.getElementById('hdrSelNode').classList.add('open');
-    setMode('idle','NODE SELECTED · EDIT IN PANEL · ESC DESELECT');
+    if(reopenCollapsible){
+      document.getElementById('bodySelNode').classList.add('open');
+      document.getElementById('hdrSelNode').classList.add('open');
+    }
   } else {
     section.style.display='none';
-    setMode('idle','MID/RIGHT DRAG PAN · SCROLL ZOOM · ALT+DRAG BOX SELECT · F FOCUS');
+  }
+}
+
+function hideNodeEditPanel(){
+  document.getElementById('nodeEditSection').style.display='none';
+  document.getElementById('infoPanelSep').style.display='none';
+}
+
+function updateSelModeBar(){
+  const n=selectedNodes.size;
+  if(n>1)       setMode('idle',`${n} NODES SELECTED · DRAG MOVE ALL · CTRL+CLICK TOGGLE · DEL DELETE · ESC CLEAR`);
+  else if(n===1) setMode('idle','1 NODE SELECTED · CTRL+CLICK ADD · DRAG MOVE · ESC DESELECT');
+  else           setMode('idle',IDLE_HINT);
+}
+
+function clickNode(id){
+  // Select a single node (called programmatically, not from UI events)
+  selEdge=null; connecting=null; prevLine.attr('opacity',0);
+  selectedNodes.clear();
+  if(id){
+    selectedNodes.add(id);
+    selNode=id;
+    updateNodeEditPanel(true);
+    setMode('idle','1 NODE SELECTED · CTRL+CLICK ADD · DRAG MOVE · ESC DESELECT');
+  } else {
+    selNode=null;
+    hideNodeEditPanel();
+    setMode('idle',IDLE_HINT);
   }
   render();
 }
 
-let _nodeEditSnapshotted=false;
 function applyNodeEdit(){
   if(!selNode) return;
   const n=nodes.find(n=>n.id===selNode);
@@ -1500,7 +1634,7 @@ function restoreState(raw){
   document.getElementById('panelConnect').classList.remove('show');
   // Re-ensure markers for all edge types
   edges.forEach(e=>ensureEType(e.type));
-  setMode('idle','MID/RIGHT DRAG PAN · SCROLL ZOOM · ALT+DRAG BOX SELECT · F FOCUS');
+  setMode('idle',IDLE_HINT);
   render();
 }
 
@@ -1588,9 +1722,18 @@ function runAutoLayout(){
 
   // Animated algorithm
   const iterations=Math.max(1,parseInt(document.getElementById('layoutIters').value)||300);
-  const springK=Math.max(0.5,parseFloat(document.getElementById('layoutSpringK').value)||2.2);
+  const params={
+    initialDist:        Math.max(0.5, parseFloat(document.getElementById('layoutInitDist').value)   || 5),
+    initIters:          Math.max(0,   parseInt(document.getElementById('layoutInitIters').value)     || 10),
+    repulsionStrength:  Math.max(0.001,parseFloat(document.getElementById('layoutRepulsion').value)  || 0.07),
+    attractionStrength: Math.max(0.001,parseFloat(document.getElementById('layoutAttraction').value) || 0.03),
+    dampingFactor:      Math.max(0.1, parseFloat(document.getElementById('layoutDamp').value)        || 4),
+    minDistance:        Math.max(0.1, parseFloat(document.getElementById('layoutMinDist').value)     || 0.7),
+    maxMovement:        Math.max(0.05,parseFloat(document.getElementById('layoutMaxMove').value)     || 1),
+    gravityStrength:    Math.max(0,   parseFloat(document.getElementById('layoutGravity').value)     || 1),
+  };
   let totalIters=iterations, remaining=iterations;
-  algo.init(ctx,iterations,springK);
+  algo.init(ctx,iterations,params);
 
   const btn=document.getElementById('btnAutoLayout');
   btn.textContent='⏹ Stop';
@@ -1744,6 +1887,31 @@ function exportPNG(scale=2){
   bgRect.setAttribute('fill','#0d1117');
   rootG?.insertBefore(bgRect,rootG.firstChild);
 
+  // Inject CSS style block to fix font + fill issues when rendered as image
+  // Fonts: embed via @font-face using the already-loaded JetBrains Mono if available,
+  // otherwise fall back to Courier New monospace. Also fix edge path fill.
+  const styleEl=document.createElementNS('http://www.w3.org/2000/svg','style');
+  styleEl.textContent=`
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap');
+    text { font-family: 'JetBrains Mono', 'Courier New', monospace; }
+    .gedge-vis { fill: none !important; }
+    .gedge-hit { fill: none !important; stroke: transparent; }
+    .anchor { display: none; }
+    #BL { display: none; }
+    #modebar { display: none; }
+  `;
+  svgClone.insertBefore(styleEl, svgClone.firstChild);
+
+  // Also fix all gedge-vis paths inline (belt + braces)
+  svgClone.querySelectorAll('.gedge-vis').forEach(p=>{
+    p.setAttribute('fill','none');
+    p.style.fill='none';
+  });
+  // Hide box-select rect + anchors in export
+  svgClone.querySelectorAll('.anchor').forEach(a=>a.setAttribute('display','none'));
+  const boxRectEl=svgClone.querySelector('#boxRect');
+  if(boxRectEl) boxRectEl.setAttribute('display','none');
+
   const svgStr=new XMLSerializer().serializeToString(svgClone);
   const blob=new Blob([svgStr],{type:'image/svg+xml;charset=utf-8'});
   const url=URL.createObjectURL(blob);
@@ -1765,7 +1933,8 @@ function exportPNG(scale=2){
     },'image/png');
   };
   img.onerror=()=>{alert('PNG export failed. Try SVG instead.');URL.revokeObjectURL(url);}
-  img.src=url;
+  // Small delay to allow font loading inside the image
+  setTimeout(()=>{img.src=url;},50);
 }
 
 // ── Pills ─────────────────────────────────────────────────────────────────────
@@ -1780,6 +1949,11 @@ function rebuildPills(){
     if(type===activeType)b.style.background=s.color;
     b.onclick=()=>setType(type);el.appendChild(b);
   });
+  // Refresh edge-select type pills if an edge is currently selected
+  if(selEdge){
+    const e=edges.find(e=>e.id===selEdge);
+    if(e) updateEdgeSelTypePills(e);
+  }
 }
 rebuildPills();
 
@@ -1833,12 +2007,6 @@ function refreshSidebar(){
     list.appendChild(d);
   });
   document.getElementById('nodeCount').textContent=nodes.length;
-  ['eFrom','eTo'].forEach(id=>{
-    const s=document.getElementById(id),cur=s.value;
-    s.innerHTML='<option value="">— node —</option>';
-    nodes.forEach(n=>{const o=document.createElement('option');o.value=n.id;o.textContent=n.name;s.appendChild(o)});
-    s.value=cur;
-  });
 }
 
 // Note textarea auto-resize
@@ -1878,7 +2046,7 @@ function clearAll(){
   document.getElementById('panelConnect').classList.remove('show');
   document.getElementById('panelSel').classList.remove('show');
   document.getElementById('nodeEditSection').style.display='none';
-  setMode('idle','MID/RIGHT DRAG PAN · SCROLL ZOOM · ALT+DRAG BOX SELECT · F FOCUS');
+  setMode('idle',IDLE_HINT);
   render();
 }
 
