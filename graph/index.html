@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <title>Dependency Graph Builder</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="graph-layouts.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -323,6 +324,52 @@ textarea.dsl:focus{border-color:var(--purple)}
 /* undo/redo buttons */
 .hbtn.undoredo{letter-spacing:0;padding:4px 9px;font-size:13px}
 .hbtn.undoredo:disabled{opacity:.25;cursor:default;pointer-events:none}
+/* layout algo selector */
+#layoutAlgoSel{
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  padding:4px 8px;border-radius:5px;cursor:pointer;
+  border:1px solid rgba(188,140,255,.4);background:transparent;color:var(--purple);
+  outline:none;transition:border-color .15s;
+}
+#layoutAlgoSel:hover,#layoutAlgoSel:focus{border-color:var(--purple);background:rgba(188,140,255,.07);}
+#layoutAlgoSel option{background:var(--panel);color:var(--text);}
+/* layout iters + spring-k controls */
+#layoutItersWrap{
+  display:none;align-items:center;gap:5px;
+  font-size:11px;color:var(--muted);
+}
+#layoutItersWrap.show{display:flex;}
+#layoutIters,#layoutSpringK{
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  padding:4px 6px;border-radius:5px;
+  border:1px solid rgba(188,140,255,.4);background:transparent;color:var(--purple);
+  outline:none;text-align:center;
+  -moz-appearance:textfield;
+}
+#layoutIters{width:58px;}
+#layoutSpringK{width:46px;}
+#layoutIters::-webkit-inner-spin-button,#layoutIters::-webkit-outer-spin-button,
+#layoutSpringK::-webkit-inner-spin-button,#layoutSpringK::-webkit-outer-spin-button{-webkit-appearance:none}
+#layoutIters:focus,#layoutSpringK:focus{border-color:var(--purple);}
+#layoutItersWrap .lbl-sep{width:1px;height:14px;background:rgba(188,140,255,.2);margin:0 2px;}
+/* progress ring shown while spring is running */
+#layoutProgress{
+  display:none;align-items:center;gap:6px;
+  font-size:10px;color:var(--purple);letter-spacing:1px;white-space:nowrap;
+}
+#layoutProgress.show{display:flex;}
+#springRing{
+  width:14px;height:14px;border-radius:50%;
+  border:2px solid rgba(188,140,255,.25);
+  border-top-color:var(--purple);
+  animation:spinRing .7s linear infinite;
+}
+@keyframes spinRing{to{transform:rotate(360deg)}}
+/* Auto Layout btn running state */
+#btnAutoLayout.running{
+  border-color:var(--red)!important;color:var(--red)!important;
+  background:rgba(247,129,102,.08)!important;
+}
 
 /* edge handle pulse */
 @keyframes pulse-h{0%,100%{opacity:.65}50%{opacity:1}}
@@ -342,7 +389,16 @@ body.resizing{user-select:none}
     <button class="hbtn undoredo" id="btnRedo" onclick="redo()" title="Redo (Ctrl+Y)" disabled>↪</button>
     <button class="hbtn" onclick="loadExample()">Example</button>
     <button class="hbtn focus" onclick="focusAll()">Focus ⌖ (F)</button>
-    <button class="hbtn" onclick="autoLayout()" id="btnAutoLayout" style="border-color:rgba(188,140,255,.4);color:var(--purple)" onmouseenter="this.style.background='rgba(188,140,255,.1)'" onmouseleave="this.style.background='transparent'">Auto Layout</button>
+    <select id="layoutAlgoSel" title="Auto Layout algorithm" onchange="onLayoutAlgoChange()"></select>
+    <span id="layoutItersWrap" title="Spring simulation parameters">
+      <span>iters</span>
+      <input id="layoutIters" type="number" value="300" min="50" max="5000" step="50" title="Physics iterations"/>
+      <span class="lbl-sep"></span>
+      <span title="Spring rest-length multiplier — higher = more spacing between connected nodes">K</span>
+      <input id="layoutSpringK" type="number" value="2.2" min="0.5" max="10" step="0.1" title="Spring constant (rest-length × node size). Higher = more distance between connected nodes."/>
+    </span>
+    <span id="layoutProgress"><span id="springRing"></span><span id="layoutProgressTxt"></span></span>
+    <button class="hbtn" id="btnAutoLayout" onclick="runAutoLayout()" style="border-color:rgba(188,140,255,.4);color:var(--purple)" onmouseenter="this.style.background='rgba(188,140,255,.1)'" onmouseleave="this.style.background=''">Auto Layout</button>
     <button class="hbtn" id="dslToggleBtn" onclick="toggleDSL()" style="border-color:rgba(188,140,255,.4);color:var(--purple)" onmouseenter="this.style.background='rgba(188,140,255,.1)'" onmouseleave="this.style.background=document.getElementById('dslPanel').classList.contains('open')?'rgba(188,140,255,.08)':'transparent'">DSL ▾</button>
     <button class="hbtn" onclick="openExportModal()">Export…</button>
     <button class="hbtn danger" onclick="clearAll()">Clear</button>
@@ -608,10 +664,7 @@ const zoom=d3.zoom().scaleExtent([.07,5])
     if(boxSel) return false; // block zoom during box-select
     if(ev.type==='wheel') return true;
     if(ev.button===1||ev.button===2) return true;
-    if(ev.button===0){
-      const t=ev.target,id=t.id||'';
-      return t===svgEl||id==='root'||id==='EL'||id==='NL'||t.tagName?.toLowerCase()==='svg';
-    }
+    // Left-button pan is disabled — use Alt+drag for box-select, middle/right for pan
     return false;
   })
   .on('zoom',ev=>root.attr('transform',ev.transform));
@@ -1219,6 +1272,7 @@ document.addEventListener('keydown',ev=>{
   if(ev.key==='Delete'||ev.key==='Backspace'){
     if(selectedNodes.size){snapshot();[...selectedNodes].forEach(id=>delNodeSilent(id));selectedNodes.clear();render();return}
     if(selEdge){delEdge(selEdge);return}
+    if(selNode){delNode(selNode);return}
   }
   // A = select all
   if(ev.key==='a'&&!ev.ctrlKey&&!ev.metaKey){
@@ -1477,81 +1531,96 @@ function delNodeSilent(id){
   if(selEdge&&!edges.find(e=>e.id===selEdge)){selEdge=null;}
 }
 
-// ── Auto Layout (kind-row primary + barycenter horizontal) ────────────────────
-function autoLayout(){
+// ── Auto Layout — delegates to graph-layouts.js ───────────────────────────────
+let _layoutRAF = null; // current animation frame handle
+
+function populateLayoutDropdown(){
+  const sel=document.getElementById('layoutAlgoSel');
+  sel.innerHTML='';
+  GraphLayouts.algorithms.forEach(a=>{
+    const o=document.createElement('option');
+    o.value=a.id;o.textContent=a.label;sel.appendChild(o);
+  });
+  onLayoutAlgoChange();
+}
+
+function onLayoutAlgoChange(){
+  const id=document.getElementById('layoutAlgoSel').value;
+  const algo=GraphLayouts.algorithms.find(a=>a.id===id);
+  const itersWrap=document.getElementById('layoutItersWrap');
+  if(algo?.animated){
+    itersWrap.classList.add('show');
+    const itersEl=document.getElementById('layoutIters');
+    if(algo.defaultIters) itersEl.value=algo.defaultIters;
+  } else {
+    itersWrap.classList.remove('show');
+  }
+}
+
+function stopLayout(){
+  if(_layoutRAF){cancelAnimationFrame(_layoutRAF);_layoutRAF=null;}
+  const btn=document.getElementById('btnAutoLayout');
+  btn.textContent='Auto Layout';
+  btn.classList.remove('running');
+  btn.onclick=runAutoLayout;
+  document.getElementById('layoutProgress').classList.remove('show');
+}
+
+function runAutoLayout(){
   if(!nodes.length) return;
+
+  // If already running (spring), stop it
+  if(_layoutRAF){ stopLayout(); return; }
+
   snapshot();
+  const id=document.getElementById('layoutAlgoSel').value||'layered';
+  const algo=GraphLayouts.algorithms.find(a=>a.id===id);
+  if(!algo){ console.warn('Unknown layout',id); return; }
 
-  // Primary layer = node kind (custom kinds map to 2 like impl)
-  const KIND_LAYER={tester:0,interface:1,impl:2,external:3};
-  const layer={};
-  nodes.forEach(n=>{layer[n.id]=KIND_LAYER[n.kind]??2;});
+  const ctx={nodes,edges,NW,NH,canvasW:mainEl.clientWidth,canvasH:mainEl.clientHeight};
 
-  // Group by layer
-  const byLayer={};
-  nodes.forEach(n=>{
-    const l=layer[n.id];
-    (byLayer[l]||(byLayer[l]=[])).push(n);
-  });
-  const layerNums=Object.keys(byLayer).map(Number).sort((a,b)=>a-b);
-
-  // Initial order: alphabetical within each layer
-  layerNums.forEach(ln=>{
-    byLayer[ln].sort((a,b)=>a.name.localeCompare(b.name));
-  });
-
-  // Undirected adjacency for barycenter
-  const adj={};
-  nodes.forEach(n=>{adj[n.id]=[];});
-  edges.forEach(e=>{
-    if(layer[e.s]!==layer[e.t]){
-      adj[e.s].push(e.t);
-      adj[e.t].push(e.s);
-    }
-  });
-
-  // Barycenter heuristic — 6 passes alternating top-down / bottom-up
-  for(let pass=0;pass<6;pass++){
-    const layersOrdered=pass%2===0?[...layerNums]:[...layerNums].reverse();
-    layersOrdered.forEach(ln=>{
-      const arr=byLayer[ln];
-      // Assign current rank to each node
-      arr.forEach((n,i)=>{n._rank=i;});
-      arr.forEach(n=>{
-        const nbrs=adj[n.id];
-        if(!nbrs.length){n._bary=n._rank;return;}
-        let sum=0,cnt=0;
-        nbrs.forEach(id=>{
-          const nL=layer[id];
-          const peer=byLayer[nL]?.find(nd=>nd.id===id);
-          if(peer!=null){sum+=peer._rank??0;cnt++;}
-        });
-        n._bary=cnt?sum/cnt:n._rank;
-      });
-      arr.sort((a,b)=>a._bary-b._bary);
-      // Re-assign rank after sort
-      arr.forEach((n,i)=>{n._rank=i;});
-    });
+  if(!algo.animated){
+    algo.fn(ctx);
+    render();
+    setTimeout(focusAll,80);
+    return;
   }
 
-  // Position
-  const PAD_X=54,PAD_Y=72;
-  const STEP_X=NW+PAD_X,STEP_Y=NH+PAD_Y;
-  const W=mainEl.clientWidth;
+  // Animated algorithm
+  const iterations=Math.max(1,parseInt(document.getElementById('layoutIters').value)||300);
+  const springK=Math.max(0.5,parseFloat(document.getElementById('layoutSpringK').value)||2.2);
+  let totalIters=iterations, remaining=iterations;
+  algo.init(ctx,iterations,springK);
 
-  layerNums.forEach((ln,li)=>{
-    const arr=byLayer[ln];
-    const totalW=arr.length*STEP_X-PAD_X;
-    const startX=W/2-totalW/2;
-    arr.forEach((n,i)=>{
-      n.x=startX+i*STEP_X;
-      n.y=80+li*STEP_Y;
-    });
-  });
+  const btn=document.getElementById('btnAutoLayout');
+  btn.textContent='⏹ Stop';
+  btn.classList.add('running');
+  btn.onclick=stopLayout;
 
-  render();
-  setTimeout(focusAll,80);
+  const progWrap=document.getElementById('layoutProgress');
+  const progTxt=document.getElementById('layoutProgressTxt');
+  progWrap.classList.add('show');
+
+  function tick(){
+    const more=algo.step();
+    render();
+    // Estimate remaining from stepsPerFrame (approximate)
+    // We count down via a simple closure counter
+    remaining=Math.max(0,remaining-Math.max(1,Math.ceil(totalIters/120)));
+    const pct=Math.round((1-remaining/totalIters)*100);
+    progTxt.textContent=`${Math.min(pct,100)}%`;
+    if(more){
+      _layoutRAF=requestAnimationFrame(tick);
+    } else {
+      stopLayout();
+      setTimeout(focusAll,80);
+    }
+  }
+  _layoutRAF=requestAnimationFrame(tick);
 }
+
+// Legacy alias used by parseDSL after replace
+function autoLayout(){ runAutoLayout(); }
 
 // ── DSL Syntax Highlighting ───────────────────────────────────────────────────
 function updateDSLHighlight(){/* no-op: plain colored textarea */}
@@ -1858,6 +1927,7 @@ document.querySelectorAll('input[name=expFmt]').forEach(r=>{
 document.getElementById('pngOpts').style.display='none'; // default to SVG
 
 loadLayout();
+populateLayoutDropdown();
 render();
 updateUndoUI();
 
