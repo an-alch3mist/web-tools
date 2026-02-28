@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SoloLab — Unity Dev Toolbox</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet"/>
+<style>
+/* ── Reset & root ──────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #0d1117;
+  --surface: #161b22;
+  --border:  #30363d;
+  --border2: #21262d;
+  --text:    #e6edf3;
+  --muted:   #8b949e;
+  --dim:     #3d444d;
+
+  --blue:    #58a6ff;
+  --green:   #3fb950;
+  --purple:  #bc8cff;
+  --amber:   #d29922;
+  --red:     #f78166;
+  --teal:    #39d353;
+  --cyan:    #79c0ff;
+  --pink:    #f778ba;
+}
+
+html, body { height: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Background grid texture ───────────────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(var(--border2) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border2) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: .35;
+}
+
+/* glow blobs */
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 600px 400px at 15% 20%, #0f2339 0%, transparent 70%),
+    radial-gradient(ellipse 500px 400px at 85% 75%, #0f2218 0%, transparent 70%),
+    radial-gradient(ellipse 400px 300px at 50% 50%, #1a1130 0%, transparent 70%);
+}
+
+/* ── Layout ────────────────────────────────────────────────────────────────── */
+.page { position: relative; z-index: 1; max-width: 1080px; margin: 0 auto; padding: 0 24px 80px; }
+
+/* ── Top nav ───────────────────────────────────────────────────────────────── */
+nav {
+  display: flex; align-items: center;
+  padding: 0 24px; height: 52px;
+  border-bottom: 1px solid var(--border2);
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(13,17,23,.85);
+  backdrop-filter: blur(12px);
+  gap: 12px;
+}
+
+.nav-logo {
+  display: flex; align-items: center; gap: 9px;
+  text-decoration: none;
+}
+.logo-mark {
+  width: 28px; height: 28px;
+  background: linear-gradient(135deg, var(--blue), var(--purple));
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; color: #fff;
+  flex-shrink: 0;
+}
+.logo-text { font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: .5px; }
+.logo-text span { color: var(--blue); }
+
+.nav-tag {
+  font-size: 9px; padding: 2px 7px; border-radius: 10px;
+  border: 1px solid var(--border); color: var(--dim);
+  letter-spacing: 1px; text-transform: uppercase;
+}
+
+.nav-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+.nav-link {
+  font-size: 11px; color: var(--muted); text-decoration: none;
+  transition: color .15s;
+}
+.nav-link:hover { color: var(--text); }
+
+.nav-gh {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; color: var(--muted); text-decoration: none;
+  border: 1px solid var(--border); border-radius: 6px;
+  padding: 4px 10px; transition: border-color .15s, color .15s;
+}
+.nav-gh:hover { border-color: var(--blue); color: var(--blue); }
+.nav-gh svg { width: 14px; height: 14px; fill: currentColor; }
+
+/* ── Hero ──────────────────────────────────────────────────────────────────── */
+.hero {
+  padding: 64px 0 48px;
+  display: flex; flex-direction: column; align-items: flex-start;
+  gap: 12px;
+}
+
+.hero-eyebrow {
+  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--blue); opacity: .8;
+}
+
+.hero h1 {
+  font-size: clamp(32px, 5vw, 52px);
+  font-weight: 700; line-height: 1.1;
+  letter-spacing: -1px;
+}
+.hero h1 em { font-style: normal; color: var(--blue); }
+
+.hero p {
+  font-size: 13px; color: var(--muted); line-height: 1.7;
+  max-width: 520px; margin-top: 4px;
+}
+
+.hero-stats {
+  display: flex; gap: 28px; margin-top: 8px;
+}
+.stat { display: flex; flex-direction: column; gap: 2px; }
+.stat-n { font-size: 20px; font-weight: 700; color: var(--text); }
+.stat-l { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: var(--dim); }
+
+/* ── Section header ────────────────────────────────────────────────────────── */
+.section-head {
+  display: flex; align-items: center; gap: 10px;
+  margin: 40px 0 18px;
+}
+.section-head h2 {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 3px; color: var(--dim);
+}
+.section-head::after {
+  content: ''; flex: 1; height: 1px; background: var(--border2);
+}
+
+/* ── Tool grid ─────────────────────────────────────────────────────────────── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+}
+
+/* ── Tool card ─────────────────────────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  text-decoration: none; color: inherit;
+  display: flex; flex-direction: column; gap: 10px;
+  position: relative; overflow: hidden;
+  transition: border-color .2s, transform .2s, box-shadow .2s;
+  cursor: pointer;
+  animation: fadeUp .4s ease both;
+}
+.card:nth-child(1)  { animation-delay: .05s; }
+.card:nth-child(2)  { animation-delay: .10s; }
+.card:nth-child(3)  { animation-delay: .15s; }
+.card:nth-child(4)  { animation-delay: .20s; }
+.card:nth-child(5)  { animation-delay: .25s; }
+.card:nth-child(6)  { animation-delay: .30s; }
+.card:nth-child(7)  { animation-delay: .35s; }
+.card:nth-child(8)  { animation-delay: .40s; }
+.card:nth-child(9)  { animation-delay: .45s; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+/* color accent bar on left */
+.card::before {
+  content: '';
+  position: absolute; left: 0; top: 16px; bottom: 16px;
+  width: 2px; border-radius: 2px;
+  background: var(--accent, var(--blue));
+  opacity: 0; transition: opacity .2s;
+}
+.card:hover { border-color: var(--accent, var(--blue)); transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0,0,0,.4); }
+.card:hover::before { opacity: 1; }
+
+/* glow shimmer on hover */
+.card::after {
+  content: '';
+  position: absolute; inset: 0; border-radius: 10px;
+  background: radial-gradient(ellipse 200px 100px at var(--mx,50%) var(--my,50%),
+    rgba(255,255,255,.03), transparent 70%);
+  pointer-events: none;
+}
+
+.card-top { display: flex; align-items: flex-start; justify-content: space-between; }
+
+.card-icon {
+  width: 38px; height: 38px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.card-badge {
+  font-size: 8px; text-transform: uppercase; letter-spacing: 2px;
+  padding: 3px 7px; border-radius: 10px;
+  background: rgba(255,255,255,.04); border: 1px solid var(--border);
+  color: var(--muted);
+}
+.badge-ready  { border-color: var(--green);  color: var(--green);  background: rgba(63,185,80,.08); }
+.badge-soon   { border-color: var(--amber);  color: var(--amber);  background: rgba(210,153,34,.08); }
+.badge-planned{ border-color: var(--dim);    color: var(--dim);                                      }
+
+.card-name {
+  font-size: 13px; font-weight: 700; color: var(--text);
+}
+.card-path {
+  font-size: 9px; color: var(--dim); margin-top: 1px;
+  letter-spacing: .5px;
+}
+.card-desc {
+  font-size: 10.5px; color: var(--muted); line-height: 1.65;
+}
+
+.card-tags {
+  display: flex; flex-wrap: wrap; gap: 5px; margin-top: 2px;
+}
+.tag {
+  font-size: 8.5px; padding: 2px 7px; border-radius: 9px;
+  background: rgba(255,255,255,.04); border: 1px solid var(--border2);
+  color: var(--dim);
+}
+
+.card-arrow {
+  position: absolute; bottom: 18px; right: 18px;
+  font-size: 14px; color: var(--dim);
+  transition: color .2s, transform .2s;
+}
+.card:hover .card-arrow { color: var(--accent, var(--blue)); transform: translate(2px,-2px); }
+
+/* disabled card */
+.card.disabled { pointer-events: none; opacity: .5; }
+.card.disabled .card-arrow { display: none; }
+
+/* ── Search bar ────────────────────────────────────────────────────────────── */
+.search-wrap {
+  position: relative; max-width: 340px; margin-bottom: 28px;
+}
+.search-wrap input {
+  width: 100%; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 8px;
+  color: var(--text); font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; padding: 9px 12px 9px 34px;
+  outline: none; transition: border-color .15s;
+}
+.search-wrap input:focus { border-color: var(--blue); }
+.search-wrap input::placeholder { color: var(--dim); }
+.search-icon {
+  position: absolute; left: 10px; top: 50%;
+  transform: translateY(-50%); color: var(--dim); font-size: 13px;
+  pointer-events: none;
+}
+
+/* ── Footer ────────────────────────────────────────────────────────────────── */
+footer {
+  border-top: 1px solid var(--border2);
+  padding: 28px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 10px; color: var(--dim);
+  position: relative; z-index: 1;
+}
+footer a { color: var(--muted); text-decoration: none; transition: color .15s; }
+footer a:hover { color: var(--blue); }
+.footer-links { display: flex; gap: 18px; }
+
+/* ── Scrollbar ─────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ── Responsive ────────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .hero h1 { font-size: 28px; }
+  .hero-stats { gap: 16px; }
+  nav { padding: 0 12px; }
+  .page { padding: 0 14px 60px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Nav ──────────────────────────────────────────────────────────────────── -->
+<nav>
+  <a class="nav-logo" href="#">
+    <div class="logo-mark">S</div>
+    <span class="logo-text">Solo<span>Lab</span></span>
+  </a>
+  <span class="nav-tag">v0.1</span>
+
+  <div class="nav-right">
+    <a class="nav-link" href="#tools">Tools</a>
+    <a class="nav-link" href="#planned">Roadmap</a>
+    <a class="nav-gh" href="https://github.com" target="_blank">
+      <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
+        0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01
+        1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95
+        0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68
+        0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15
+        0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38
+        A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      GitHub
+    </a>
+  </div>
+</nav>
+
+<!-- ── Page ──────────────────────────────────────────────────────────────────── -->
+<div class="page">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-eyebrow">Unity3D · Web · Toolbox</div>
+    <h1>Tools</h1>
+    <p>A collection of browser tools built for vizualize solo Unity development</p>
+    <div class="hero-stats">
+      <div class="stat"><span class="stat-n" id="readyCount">0</span><span class="stat-l">Ready</span></div>
+      <div class="stat"><span class="stat-n" id="soonCount">0</span><span class="stat-l">Coming Soon</span></div>
+      <div class="stat"><span class="stat-n" id="totalCount">0</span><span class="stat-l">Total Tools</span></div>
+    </div>
+  </section>
+
+  <!-- Search -->
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input id="search" type="text" placeholder="Search tools..." oninput="filterCards()"/>
+  </div>
+
+  <!-- ── Ready tools ──────────────────────────────────────────────────────── -->
+  <div class="section-head" id="tools"><h2>Tools</h2></div>
+  <div class="grid" id="readyGrid">
+
+    <a class="card" href="graph/index.html" style="--accent:var(--blue)">
+      <div class="card-top">
+        <div class="card-icon">◈</div>
+        <span class="card-badge badge-ready">Ready</span>
+      </div>
+      <div>
+        <div class="card-name">Dependency Graph Builder</div>
+        <div class="card-path">sololab/graph</div>
+      </div>
+      <div class="card-desc">Visually map class relationships, interfaces, and dependencies for any Unity system using D3.js. Drag, zoom, export SVG.</div>
+      <div class="card-tags">
+        <span class="tag">D3.js</span>
+        <span class="tag">architecture</span>
+        <span class="tag">drag + drop</span>
+        <span class="tag">SVG export</span>
+      </div>
+      <span class="card-arrow">↗</span>
+    </a>
+
+  </div>
+
+  <!-- ── Coming soon ──────────────────────────────────────────────────────── -->
+  <div class="section-head" id="planned"><h2>Roadmap</h2></div>
+  <div class="grid" id="plannedGrid">
+
+    <div class="card disabled" style="--accent:var(--green)">
+      <div class="card-top">
+        <div class="card-icon">📝</div>
+        <span class="card-badge badge-soon">Soon</span>
+      </div>
+      <div>
+        <div class="card-name">Markdown Viewer</div>
+        <div class="card-path">sololab/markdown</div>
+      </div>
+      <div class="card-desc">Render and browse Markdown docs in-browser. Paste GDD content, README files, or design notes with syntax highlighting.</div>
+      <div class="card-tags">
+        <span class="tag">docs</span>
+        <span class="tag">GDD</span>
+        <span class="tag">markdown</span>
+      </div>
+    </div>
+
+    <div class="card disabled" style="--accent:var(--purple)">
+      <div class="card-top">
+        <div class="card-icon">🔐</div>
+        <span class="card-badge badge-soon">Soon</span>
+      </div>
+      <div>
+        <div class="card-name">Decrypt Text</div>
+        <div class="card-path">sololab/decrypt</div>
+      </div>
+      <div class="card-desc">Encode and decode strings — Base64, XOR cipher, ROT13, and Caesar shift. Useful for save-file obfuscation and in-game puzzles.</div>
+      <div class="card-tags">
+        <span class="tag">Base64</span>
+        <span class="tag">XOR</span>
+        <span class="tag">cipher</span>
+        <span class="tag">save data</span>
+      </div>
+    </div>
+
+    <div class="card disabled" style="--accent:var(--amber)">
+      <div class="card-top">
+        <div class="card-icon">🎨</div>
+        <span class="card-badge badge-soon">Soon</span>
+      </div>
+      <div>
+        <div class="card-name">Color Converter</div>
+        <div class="card-path">sololab/color</div>
+      </div>
+      <div class="card-desc">Convert between Unity Color32, hex, HSV, and linear float values. Preview swatches and copy code-ready snippets directly.</div>
+      <div class="card-tags">
+        <span class="tag">Color32</span>
+        <span class="tag">hex</span>
+        <span class="tag">HSV</span>
+        <span class="tag">Unity</span>
+      </div>
+    </div>
+
+    <div class="card disabled" style="--accent:var(--teal)">
+      <div class="card-top">
+        <div class="card-icon">⏱</div>
+        <span class="card-badge badge-soon">Soon</span>
+      </div>
+      <div>
+        <div class="card-name">Sprint Timer</div>
+        <div class="card-path">sololab/timer</div>
+      </div>
+      <div class="card-desc">Pomodoro-style focus timer tuned for solo game dev sessions. Track tasks per sprint and log daily output streaks.</div>
+      <div class="card-tags">
+        <span class="tag">pomodoro</span>
+        <span class="tag">focus</span>
+        <span class="tag">productivity</span>
+      </div>
+    </div>
+
+    <div class="card disabled" style="--accent:var(--pink)">
+      <div class="card-top">
+        <div class="card-icon">🖼</div>
+        <span class="card-badge badge-planned">Planned</span>
+      </div>
+      <div>
+        <div class="card-name">Spritesheet Viewer</div>
+        <div class="card-path">sololab/spritesheet</div>
+      </div>
+      <div class="card-desc">Upload a spritesheet, define rows and columns, and preview individual animation frames. Export frame data as JSON for Unity import.</div>
+      <div class="card-tags">
+        <span class="tag">sprites</span>
+        <span class="tag">animation</span>
+        <span class="tag">JSON export</span>
+      </div>
+    </div>
+
+    <div class="card disabled" style="--accent:var(--cyan)">
+      <div class="card-top">
+        <div class="card-icon">🎲</div>
+        <span class="card-badge badge-planned">Planned</span>
+      </div>
+      <div>
+        <div class="card-name">Dice & RNG Tester</div>
+        <div class="card-path">sololab/rng</div>
+      </div>
+      <div class="card-desc">Test probability distributions, roll custom dice formulas, and visualise drop-table weights. Validate loot balance before writing a line of code.</div>
+      <div class="card-tags">
+        <span class="tag">probability</span>
+        <span class="tag">loot tables</span>
+        <span class="tag">balance</span>
+      </div>
+    </div>
+
+    <div class="card disabled" style="--accent:var(--red)">
+      <div class="card-top">
+        <div class="card-icon">📐</div>
+        <span class="card-badge badge-planned">Planned</span>
+      </div>
+      <div>
+        <div class="card-name">Stat Curve Editor</div>
+        <div class="card-path">sololab/statcurve</div>
+      </div>
+      <div class="card-desc">Design and preview player stat progressions — XP curves, damage scaling, level gates. Export as Unity AnimationCurve-compatible JSON.</div>
+      <div class="card-tags">
+        <span class="tag">balancing</span>
+        <span class="tag">curves</span>
+        <span class="tag">XP / level</span>
+      </div>
+    </div>
+
+    <div class="card disabled" style="--accent:var(--muted)">
+      <div class="card-top">
+        <div class="card-icon">📋</div>
+        <span class="card-badge badge-planned">Planned</span>
+      </div>
+      <div>
+        <div class="card-name">Scratchpad</div>
+        <div class="card-path">sololab/notes</div>
+      </div>
+      <div class="card-desc">Persistent in-browser notepad. Jot down ideas, pseudocode, and design decisions mid-session without leaving the browser.</div>
+      <div class="card-tags">
+        <span class="tag">notes</span>
+        <span class="tag">localStorage</span>
+        <span class="tag">quick-capture</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Footer ────────────────────────────────────────────────────────────────── -->
+<footer>
+  <span>SoloLab · Built with D3.js · No tracking · No ads</span>
+  <div class="footer-links">
+    <a href="https://github.com" target="_blank">GitHub</a>
+    <a href="#tools">Tools</a>
+    <a href="#planned">Roadmap</a>
+  </div>
+</footer>
+
+<script>
+// ── Card hover glow follow mouse ──────────────────────────────────────────────
+document.querySelectorAll('.card:not(.disabled)').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect();
+    card.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+    card.style.setProperty('--my', ((e.clientY - r.top)  / r.height * 100) + '%');
+  });
+});
+
+// ── Stats count ───────────────────────────────────────────────────────────────
+const ready   = document.querySelectorAll('.badge-ready').length;
+const soon    = document.querySelectorAll('.badge-soon').length;
+const planned = document.querySelectorAll('.badge-planned').length;
+
+function countUp(el, target, duration = 600) {
+  let start = null;
+  const step = ts => {
+    if (!start) start = ts;
+    const p = Math.min((ts - start) / duration, 1);
+    el.textContent = Math.floor(p * target);
+    if (p < 1) requestAnimationFrame(step);
+    else el.textContent = target;
+  };
+  requestAnimationFrame(step);
+}
+
+countUp(document.getElementById('readyCount'), ready, 400);
+countUp(document.getElementById('soonCount'),  soon,  500);
+countUp(document.getElementById('totalCount'), ready + soon + planned, 700);
+
+// ── Search filter ─────────────────────────────────────────────────────────────
+function filterCards() {
+  const q = document.getElementById('search').value.toLowerCase().trim();
+  document.querySelectorAll('.card').forEach(card => {
+    const text = card.textContent.toLowerCase();
+    card.style.display = (!q || text.includes(q)) ? '' : 'none';
+  });
+}
+
+// ── Keyboard shortcut: / focuses search ──────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
+    e.preventDefault();
+    document.getElementById('search').focus();
+  }
+});
+</script>
+</body>
+</html>
