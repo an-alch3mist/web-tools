@@ -30,12 +30,12 @@ header{
   background:var(--panel);border-bottom:1px solid var(--border);
   display:flex;align-items:center;padding:0 14px;gap:12px;
 }
-header h1{font-size:13px;font-weight:700;color:var(--blue)}
-.sub{font-size:9px;color:var(--dim);letter-spacing:1px}
+header h1{font-size:15px;font-weight:700;color:var(--blue)}
+.sub{font-size:11px;color:var(--dim);letter-spacing:1px}
 .hbtns{margin-left:auto;display:flex;gap:6px}
 .hbtn{
-  font-family:'JetBrains Mono',monospace;font-size:10px;
-  padding:4px 11px;border-radius:5px;cursor:pointer;
+  font-family:'JetBrains Mono',monospace;font-size:12px;
+  padding:4px 12px;border-radius:5px;cursor:pointer;
   border:1px solid var(--border);background:transparent;color:var(--muted);
   transition:border-color .15s,color .15s;
 }
@@ -43,29 +43,37 @@ header h1{font-size:13px;font-weight:700;color:var(--blue)}
 .hbtn.focus:hover{border-color:var(--cyan);color:var(--cyan)}
 .hbtn.danger:hover{border-color:var(--red);color:var(--red)}
 
-/* ── Sidebar ── */
+/* ── Left Sidebar ── */
 aside{
   background:var(--panel);border-right:1px solid var(--border);
   display:flex;flex-direction:column;overflow-y:auto;padding:12px;gap:12px;
+  position:relative;min-width:180px;
 }
+#leftResizeHandle{
+  position:absolute;top:0;right:-3px;bottom:0;width:6px;
+  cursor:ew-resize;z-index:10;
+  background:transparent;transition:background .15s;
+}
+#leftResizeHandle:hover,#leftResizeHandle.dragging{background:rgba(88,166,255,.3)}
+
 .sec-title{
-  font-size:8.5px;letter-spacing:2px;text-transform:uppercase;
+  font-size:10.5px;letter-spacing:2px;text-transform:uppercase;
   color:var(--dim);margin-bottom:8px;
 }
-label{font-size:10px;color:var(--muted);display:block;margin-bottom:3px}
+label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px}
 input,select,textarea{
   width:100%;font-family:'JetBrains Mono',monospace;
-  font-size:11px;background:var(--bg);border:1px solid var(--border);
+  font-size:13px;background:var(--bg);border:1px solid var(--border);
   border-radius:5px;color:var(--text);padding:6px 8px;outline:none;
   transition:border-color .15s;
 }
 input:focus,select:focus,textarea:focus{border-color:var(--blue)}
 select option{background:var(--panel)}
 .field{margin-bottom:8px}
-textarea.note-ta{resize:none;overflow:hidden;min-height:32px;line-height:1.5}
+textarea.note-ta{resize:none;overflow:hidden;min-height:34px;line-height:1.5}
 .btn{
   width:100%;font-family:'JetBrains Mono',monospace;
-  font-size:11px;font-weight:700;padding:7px;
+  font-size:13px;font-weight:700;padding:8px;
   border-radius:5px;cursor:pointer;border:1px solid;transition:all .15s;
 }
 .btn-node{border-color:var(--green);color:var(--green);background:transparent}
@@ -79,21 +87,21 @@ hr{border:none;border-top:1px solid var(--border)}
 /* edge type pills */
 .etype-pills{display:flex;gap:4px;flex-wrap:wrap}
 .epill{
-  font-size:8.5px;padding:3px 8px;border-radius:9px;
+  font-size:10.5px;padding:4px 9px;border-radius:9px;
   border:1px solid;background:transparent;cursor:pointer;
   font-family:'JetBrains Mono',monospace;transition:all .12s;
 }
 .epill.on{font-weight:700;color:#0d1117!important}
 
 /* info panels */
-.info-panel{border-radius:6px;padding:8px 10px;font-size:9.5px;line-height:1.7;display:none}
+.info-panel{border-radius:6px;padding:8px 10px;font-size:11.5px;line-height:1.7;display:none}
 .info-panel.show{display:block}
 .info-connect{background:rgba(88,166,255,.08);border:1px solid rgba(88,166,255,.25);color:var(--blue)}
 .info-sel{background:rgba(247,129,102,.08);border:1px solid rgba(247,129,102,.25);color:var(--red)}
 .sel-controls{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
 .sel-btn{
-  font-family:'JetBrains Mono',monospace;font-size:8.5px;
-  padding:3px 7px;border-radius:4px;border:1px solid;cursor:pointer;
+  font-family:'JetBrains Mono',monospace;font-size:10.5px;
+  padding:4px 8px;border-radius:4px;border:1px solid;cursor:pointer;
   background:transparent;transition:all .12s;
 }
 .sel-btn.head{border-color:rgba(247,129,102,.4);color:var(--muted)}
@@ -109,18 +117,17 @@ hr{border:none;border-top:1px solid var(--border)}
   display:flex;align-items:center;gap:6px;
   padding:5px 6px;border-radius:4px;
   background:var(--bg);border:1px solid var(--border);
-  margin-bottom:4px;font-size:10px;
+  margin-bottom:4px;font-size:12px;
 }
 .node-item .dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
 .node-item .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.node-item .dx{cursor:pointer;color:var(--dim);font-size:13px;transition:color .1s}
+.node-item .dx{cursor:pointer;color:var(--dim);font-size:15px;transition:color .1s}
 .node-item .dx:hover{color:var(--red)}
 
 /* ── Canvas ── */
 main{position:relative;overflow:hidden;
-  background:
-    radial-gradient(circle at 18% 25%,#0f1e3a 0%,transparent 55%),
-    radial-gradient(circle at 82% 72%,#0f2218 0%,transparent 50%),var(--bg);
+  background:radial-gradient(circle at 18% 25%,#0f1e3a 0%,transparent 55%),
+             radial-gradient(circle at 82% 72%,#0f2218 0%,transparent 50%),var(--bg);
 }
 #canvas{width:100%;height:100%;cursor:default;user-select:none}
 
@@ -140,7 +147,7 @@ main{position:relative;overflow:hidden;
   font-family:'JetBrains Mono',monospace;overflow:hidden;
 }
 .leg-grp{display:flex;align-items:center;gap:10px;flex-wrap:nowrap}
-.leg-item{display:flex;align-items:center;gap:5px;font-size:8.5px;color:var(--muted);white-space:nowrap}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--muted);white-space:nowrap}
 .leg-sep{width:1px;height:16px;background:var(--border);margin:0 10px;flex-shrink:0}
 .leg-dot{width:9px;height:9px;border-radius:2px;border:1.5px solid;flex-shrink:0}
 
@@ -149,7 +156,7 @@ main{position:relative;overflow:hidden;
   position:absolute;bottom:44px;left:50%;transform:translateX(-50%);
   background:var(--panel);border:1px solid var(--border);
   border-radius:20px;padding:4px 14px;
-  font-size:9px;color:var(--dim);letter-spacing:1px;
+  font-size:11px;color:var(--dim);letter-spacing:1px;
   pointer-events:none;white-space:nowrap;transition:color .2s,border-color .2s;
 }
 #modebar.connecting{color:var(--blue);border-color:rgba(88,166,255,.4)}
@@ -162,27 +169,25 @@ main{position:relative;overflow:hidden;
   text-align:center;pointer-events:none;
 }
 #empty .big{font-size:28px;opacity:.25;margin-bottom:8px}
-#empty p{font-size:10px;color:var(--dim);line-height:1.9}
+#empty p{font-size:12px;color:var(--dim);line-height:1.9}
 
 /* ── Tooltip ── */
 #tip{
   position:fixed;background:var(--panel);
   border:1px solid var(--border);border-radius:6px;
-  padding:7px 11px;font-size:10px;line-height:1.6;
+  padding:7px 11px;font-size:12px;line-height:1.6;
   pointer-events:none;opacity:0;transition:opacity .1s;
   z-index:50;max-width:220px;
 }
 
 /* ── Right DSL Panel ── */
 #dslToggleBtn{
-  position:absolute;top:50%;right:0;
-  transform:translateY(-50%);
+  position:absolute;top:50%;right:0;transform:translateY(-50%);
   background:var(--panel);border:1px solid var(--border);
   border-right:none;border-radius:6px 0 0 6px;
   font-family:'JetBrains Mono',monospace;
-  font-size:8.5px;color:var(--muted);letter-spacing:1.5px;
-  padding:14px 5px;cursor:pointer;
-  writing-mode:vertical-rl;
+  font-size:10.5px;color:var(--muted);letter-spacing:1.5px;
+  padding:16px 6px;cursor:pointer;writing-mode:vertical-rl;
   transition:color .15s,border-color .15s,background .15s;
   z-index:20;user-select:none;
 }
@@ -190,44 +195,80 @@ main{position:relative;overflow:hidden;
 #dslToggleBtn.open{color:var(--purple);border-color:rgba(188,140,255,.4);background:rgba(188,140,255,.05)}
 
 #dslPanel{
-  position:absolute;top:0;right:0;bottom:36px;width:276px;
+  position:absolute;top:0;right:0;bottom:36px;width:300px;
   background:var(--panel);border-left:1px solid var(--border);
   display:flex;flex-direction:column;overflow-y:auto;
   padding:14px 12px;gap:11px;
   transform:translateX(100%);transition:transform .22s ease;
-  z-index:15;
+  z-index:15;min-width:220px;
 }
 #dslPanel.open{transform:translateX(0)}
 
-textarea.dsl{
-  width:100%;font-family:'JetBrains Mono',monospace;
-  font-size:9.5px;background:var(--bg);border:1px solid var(--border);
-  border-radius:5px;color:var(--text);padding:7px 8px;outline:none;
-  resize:vertical;min-height:120px;line-height:1.65;transition:border-color .15s;
+#dslResizeHandle{
+  position:absolute;top:0;left:-3px;bottom:0;width:6px;
+  cursor:ew-resize;z-index:10;
+  background:transparent;transition:background .15s;
 }
-textarea.dsl:focus{border-color:var(--purple)}
+#dslResizeHandle:hover,#dslResizeHandle.dragging{background:rgba(188,140,255,.3)}
+
+/* ── DSL syntax highlight wrapper ── */
+.dsl-wrapper{
+  position:relative;
+  border-radius:5px;overflow:hidden;
+  border:1px solid var(--border);
+  background:var(--bg);
+  min-height:130px;
+  transition:border-color .15s;
+}
+.dsl-wrapper:focus-within{border-color:var(--purple)}
+.dsl-highlight{
+  position:absolute;top:0;left:0;right:0;bottom:0;
+  margin:0;padding:7px 8px;
+  font-family:'JetBrains Mono',monospace;font-size:13px;
+  line-height:1.65;white-space:pre;overflow:hidden;
+  pointer-events:none;tab-size:4;color:var(--text);
+  word-break:normal;
+}
+textarea.dsl{
+  position:relative;z-index:1;
+  width:100%;min-height:130px;
+  font-family:'JetBrains Mono',monospace;font-size:13px;
+  line-height:1.65;white-space:pre;overflow:auto;
+  resize:vertical;padding:7px 8px;
+  background:transparent!important;border:none!important;outline:none;
+  color:transparent;caret-color:#e6edf3;
+  tab-size:4;display:block;
+}
+/* DSL token colors */
+.dh-node{color:#79c0ff}
+.dh-node2{color:#3fb950}
+.dh-tip{color:#bc8cff;font-weight:700}
+.dh-dash{color:#3d444d}
+.dh-paren{color:#8b949e}
+.dh-type{color:#f78166;font-weight:600}
+.dh-comment{color:#3d444d;font-style:italic}
+.dh-err{color:#8b949e}
 
 /* collapsible example */
 .ex-toggle{
   display:flex;align-items:center;gap:5px;
-  font-size:8.5px;color:var(--dim);cursor:pointer;
+  font-size:10.5px;color:var(--dim);cursor:pointer;
   margin-bottom:4px;transition:color .12s;
 }
 .ex-toggle:hover{color:var(--muted)}
-.ex-toggle .arr{transition:transform .15s}
+.ex-toggle .arr{transition:transform .15s;display:inline-block}
 .ex-toggle.open .arr{transform:rotate(90deg)}
 .ex-body{
-  display:none;font-size:8px;color:var(--dim);
+  display:none;font-size:10px;color:var(--dim);
   background:var(--bg);border:1px solid var(--border2);
   border-radius:4px;padding:8px 10px;line-height:1.9;
+  white-space:pre;overflow-x:auto;
 }
 .ex-body.show{display:block}
-.ex-body code{color:var(--purple);font-size:8px;white-space:pre;display:block;margin:2px 0}
+.ex-body code{font-size:10px}
 
 /* ── Inline node editor ── */
-#nodeEditor{
-  position:fixed;display:none;z-index:100;
-}
+#nodeEditor{position:fixed;display:none;z-index:100}
 #nodeEditorInput{
   font-family:'JetBrains Mono',monospace;font-weight:700;
   background:rgba(13,17,23,.97);border:1.5px solid var(--blue);
@@ -235,25 +276,55 @@ textarea.dsl:focus{border-color:var(--purple)}
   text-align:center;width:100%;
 }
 
+/* ── Export Modal ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.6);
+  display:flex;align-items:center;justify-content:center;
+  z-index:200;backdrop-filter:blur(3px);
+}
+.modal-box{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:10px;padding:22px 24px;min-width:280px;max-width:360px;
+  font-family:'JetBrains Mono',monospace;
+}
+.modal-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:14px}
+.modal-sec-title{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
+.modal-radio-group{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.modal-radio{
+  display:flex;align-items:center;gap:8px;
+  font-size:13px;color:var(--muted);cursor:pointer;
+}
+.modal-radio input[type=radio]{width:auto;cursor:pointer}
+.modal-radio:hover{color:var(--text)}
+.modal-actions{display:flex;gap:8px;margin-top:16px}
+.modal-actions .btn{padding:7px 12px;width:auto;flex:1}
+.btn-cancel{border-color:var(--dim);color:var(--dim);background:transparent}
+.btn-cancel:hover{border-color:var(--muted);color:var(--muted)}
+
 /* edge handle pulse */
 @keyframes pulse-h{0%,100%{opacity:.65}50%{opacity:1}}
 .edge-h-pulse{animation:pulse-h .9s ease-in-out infinite}
+
+/* prevent text selection while resizing */
+body.resizing{user-select:none;cursor:ew-resize!important}
 </style>
 </head>
 <body>
 
 <header>
   <h1>Dependency Graph Builder</h1>
-  <span class="sub">Unity · D3.js · anchor connect · drag · zoom</span>
+  <span class="sub">Unity · D3.js</span>
   <div class="hbtns">
     <button class="hbtn" onclick="loadExample()">Example</button>
-    <button class="hbtn focus" onclick="focusAll()" title="Focus all nodes [F]">Focus ⌖</button>
-    <button class="hbtn" onclick="exportSVG()">Export SVG</button>
+    <button class="hbtn focus" onclick="focusAll()">Focus ⌖ (F)</button>
+    <button class="hbtn" onclick="openExportModal()">Export…</button>
     <button class="hbtn danger" onclick="clearAll()">Clear</button>
   </div>
 </header>
 
-<aside>
+<aside id="leftSidebar">
+  <div id="leftResizeHandle"></div>
+
   <!-- Add Node -->
   <div class="sec">
     <div class="sec-title">Add Node</div>
@@ -268,7 +339,7 @@ textarea.dsl:focus{border-color:var(--purple)}
     </div>
     <div class="field">
       <label>Note</label>
-      <textarea id="nNote" class="note-ta" placeholder="optional description…" rows="1"></textarea>
+      <textarea id="nNote" class="note-ta" placeholder="optional description…" rows="1" spellcheck="false" autocorrect="off"></textarea>
     </div>
     <button class="btn btn-node" onclick="addNode()">+ Add Node</button>
   </div>
@@ -277,28 +348,24 @@ textarea.dsl:focus{border-color:var(--purple)}
 
   <!-- Edge Type -->
   <div class="sec">
-    <div class="sec-title">Edge Type <span style="color:var(--dim);font-size:7.5px;letter-spacing:1px">1-7 SHORTCUT</span></div>
+    <div class="sec-title">Edge Type <span style="color:var(--dim);font-size:9px;letter-spacing:1px">1-7 KEY</span></div>
     <div class="etype-pills" id="etypePills"></div>
-    <div style="margin-top:9px;font-size:8.5px;color:var(--dim);line-height:2">
+    <div style="margin-top:9px;font-size:10.5px;color:var(--dim);line-height:2">
       Hover node → anchors ◉ appear<br>
       Click ◉ src → click ◉ target<br>
-      <span style="color:var(--cyan)">Mid / Right drag</span> to pan<br>
-      <span style="color:var(--blue)">F</span> focus &nbsp;·&nbsp;
-      <span style="color:var(--blue)">Esc</span> cancel &nbsp;·&nbsp;
-      <span style="color:var(--red)">Del</span> delete<br>
+      <span style="color:var(--cyan)">Mid/Right drag</span> pan · <span style="color:var(--blue)">F</span> focus<br>
+      <span style="color:var(--blue)">Esc</span> cancel · <span style="color:var(--red)">Del</span> delete<br>
       <span style="color:var(--green)">Dbl-click</span> node to rename
     </div>
   </div>
 
   <hr/>
 
-  <!-- Connect info -->
   <div class="info-panel info-connect" id="panelConnect">
     Connecting from <strong id="connectFrom">—</strong><br>
     <span style="color:var(--muted)">click a target anchor · Esc cancel</span>
   </div>
 
-  <!-- Edge selected -->
   <div class="info-panel info-sel" id="panelSel">
     Edge: <strong id="selLabel">—</strong>
     <div class="sel-controls">
@@ -322,7 +389,6 @@ textarea.dsl:focus{border-color:var(--purple)}
 
   <hr/>
 
-  <!-- Node list -->
   <div class="sec">
     <div class="sec-title">Nodes (<span id="nodeCount">0</span>)</div>
     <div id="nodeList"></div>
@@ -332,33 +398,42 @@ textarea.dsl:focus{border-color:var(--purple)}
 <main id="mainEl">
   <svg id="canvas" oncontextmenu="return false"></svg>
 
-  <!-- DSL tab button -->
+  <!-- DSL toggle tab -->
   <div id="dslToggleBtn" onclick="toggleDSL()">DSL IMPORT</div>
 
   <!-- Right DSL Panel -->
   <div id="dslPanel">
+    <div id="dslResizeHandle"></div>
     <div class="sec-title" style="color:var(--purple);margin-bottom:0">Import Dependency DSL</div>
 
     <!-- Collapsible syntax example -->
     <div>
       <div class="ex-toggle" id="exToggle" onclick="toggleExample()">
-        <span class="arr">▶</span> syntax &amp; example
+        <span class="arr">▶</span> syntax &amp; examples
       </div>
-      <div class="ex-body" id="exBody">
-        <span style="color:var(--muted)">Arrows:</span><br>
-        <code>A -(type)-> B</code><span style="font-size:7.5px">  A→B</span>
-        <code>A &lt;-(type)-> B</code><span style="font-size:7.5px">  A↔B bidirectional</span>
-        <code>A &lt;-(type)- B</code><span style="font-size:7.5px">  B→A reverse</span>
-        <br><span style="color:var(--muted)">Example (click Append):</span><br>
-        <code style="color:#6ab04c">HealthSystemTester -(uses)-> IHealthSystem
-EntityStats -(implements)-> IHealthSystem
-EntityStats &lt;-(event)-> StackedHealthBar
-StackedHealthBar -(contains)-> TMP_Text
-PlayerStats -(extends)-> EntityStats</code>
-      </div>
+      <div class="ex-body" id="exBody"><span style="color:var(--muted)">Arrow patterns (spaces optional):</span>
+<span class="dh-node">A</span> <span class="dh-tip"></span><span class="dh-dash">-(</span><span class="dh-type">type</span><span class="dh-dash">)-></span> <span class="dh-node2">B</span>          A→B
+<span class="dh-node">A</span><span class="dh-tip">&lt;</span><span class="dh-dash">-(</span><span class="dh-type">type</span><span class="dh-dash">)-></span><span class="dh-node2">B</span>          A↔B bidirectional
+<span class="dh-node">A</span><span class="dh-tip">&lt;</span><span class="dh-dash">-(</span><span class="dh-type">type</span><span class="dh-dash">)-</span><span class="dh-node2">B</span>           B→A reverse
+<span class="dh-node">A</span><span class="dh-dash">-(</span><span class="dh-type">type</span><span class="dh-dash">)-</span><span class="dh-node2">B</span>            no arrowheads
+
+<span style="color:var(--muted)">Example (click Append):</span>
+<code>HealthSystemTester-(uses)->IHealthSystem
+EntityStats-(implements)->IHealthSystem
+EntityStats&lt;-(event)->StackedHealthBar
+StackedHealthBar-(contains)->TMP_Text
+PlayerStats-(extends)->EntityStats</code></div>
     </div>
 
-    <textarea class="dsl" id="dslInput" placeholder="Paste Claude dependency output here…&#10;&#10;MyClass -(uses)-> IMyInterface&#10;MyClass -(implements)-> IBase&#10;IBase &lt;-(event)-> OtherClass"></textarea>
+    <div class="dsl-wrapper">
+      <pre class="dsl-highlight" id="dslHighlight" aria-hidden="true"></pre>
+      <textarea class="dsl" id="dslInput" spellcheck="false" autocorrect="off"
+        placeholder="Paste Claude dependency output here…
+
+MyClass-(uses)->IMyInterface
+MyClass-(implements)->IBase
+IBase &lt;-(event)-> OtherClass"></textarea>
+    </div>
 
     <div style="display:flex;gap:6px">
       <button class="btn btn-parse" style="flex:1" onclick="parseDSL(false)">+ Append</button>
@@ -366,16 +441,16 @@ PlayerStats -(extends)-> EntityStats</code>
     </div>
 
     <hr/>
-    <div style="font-size:8px;color:var(--dim);line-height:1.9">
-      Auto-detected node kinds:<br>
-      <span style="color:var(--blue)">IFoo</span> → interface &nbsp;·&nbsp;
+    <div style="font-size:10px;color:var(--dim);line-height:1.9">
+      Auto-detected kinds:<br>
+      <span style="color:var(--blue)">IFoo</span> → interface ·
       <span style="color:var(--purple)">FooTester</span> → test<br>
-      <span style="color:var(--amber)">TMP_Text / Image…</span> → built-in<br>
-      Unknown edge types get new colors automatically.
+      <span style="color:var(--amber)">TMP_Text/Image</span> → built-in<br>
+      New edge types get colors auto.
     </div>
   </div>
 
-  <!-- Legend bar -->
+  <!-- Legend -->
   <div id="legbar">
     <div class="leg-grp" id="legEdges"></div>
     <div class="leg-sep"></div>
@@ -391,13 +466,37 @@ PlayerStats -(extends)-> EntityStats</code>
   </div>
 </main>
 
-<!-- Floating inline node name editor -->
+<!-- Floating node name editor -->
 <div id="nodeEditor"><input id="nodeEditorInput" type="text" autocomplete="off"/></div>
+
+<!-- Export Modal -->
+<div class="modal-overlay" id="exportModal" style="display:none" onclick="if(event.target===this)closeExportModal()">
+  <div class="modal-box">
+    <div class="modal-title">Export Graph</div>
+    <div class="modal-sec-title">Format</div>
+    <div class="modal-radio-group">
+      <label class="modal-radio"><input type="radio" name="expFmt" value="svg" checked> SVG — vector, scalable</label>
+      <label class="modal-radio"><input type="radio" name="expFmt" value="png"> PNG — raster image</label>
+    </div>
+    <div id="pngOpts">
+      <div class="modal-sec-title">PNG Resolution</div>
+      <div class="modal-radio-group">
+        <label class="modal-radio"><input type="radio" name="expScale" value="1"> 1× (screen resolution)</label>
+        <label class="modal-radio"><input type="radio" name="expScale" value="2" checked> 2× (HD / Retina)</label>
+        <label class="modal-radio"><input type="radio" name="expScale" value="4"> 4× (4K / print)</label>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-node" onclick="doExport()">⬇ Export</button>
+      <button class="btn btn-cancel" onclick="closeExportModal()">Cancel</button>
+    </div>
+  </div>
+</div>
 
 <div id="tip"></div>
 
 <script>
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Constants ─────────────────────────────────────────────────────────────────
 const NW=162, NH=52;
 
 const KINDS={
@@ -440,15 +539,13 @@ const svg=d3.select(svgEl);
 const root=svg.append('g').attr('id','root');
 const defs=svg.append('defs');
 
-// Zoom: middle/right always pan; left only on background
 const zoom=d3.zoom().scaleExtent([.07,5])
   .filter(ev=>{
     if(ev.type==='wheel') return true;
     if(ev.button===1||ev.button===2) return true;
     if(ev.button===0){
-      const t=ev.target;
-      const id=t.id||'';
-      return t===svgEl||id==='root'||id==='EL'||t.tagName.toLowerCase()==='svg';
+      const t=ev.target,id=t.id||'';
+      return t===svgEl||id==='root'||id==='EL'||id==='NL'||t.tagName?.toLowerCase()==='svg';
     }
     return false;
   })
@@ -457,13 +554,11 @@ const zoom=d3.zoom().scaleExtent([.07,5])
 svg.call(zoom);
 svg.on('contextmenu',ev=>ev.preventDefault());
 
-// Layer order: nodes → edges → handles
-// Edges on top of nodes so arrowheads are never hidden by node rects
+// Layer: nodes below edges so arrowheads always visible
 const nodeLayer=root.append('g').attr('id','NL');
 const edgeLayer=root.append('g').attr('id','EL');
 const handleLayer=root.append('g').attr('id','HL');
 
-// Preview line
 const prevLine=root.append('path').attr('fill','none')
   .attr('stroke-width',1.5).attr('stroke-dasharray','4 3')
   .attr('opacity',0).attr('pointer-events','none');
@@ -499,13 +594,12 @@ Object.keys(ETYPES).forEach(ensureMarker);
 function ensureEType(type){
   if(ETYPES[type]) return;
   ETYPES[type]={color:CUSTOM_COLORS[customColorIdx++%CUSTOM_COLORS.length],dash:null};
-  ensureMarker(type);
-  rebuildPills();
-  rebuildLegendEdges();
+  ensureMarker(type);rebuildPills();rebuildLegendEdges();
 }
 
-// ── Fan map: spread multiple edges on same anchor pair ────────────────────────
+// ── Fan map — even distribution, all same direction ───────────────────────────
 function buildFanMap(){
+  // Group edges by endpoint pair (direction-agnostic)
   const groups={};
   edges.forEach(e=>{
     const k1=`${e.s}|${e.sA||''}|${e.t}|${e.tA||''}`;
@@ -514,19 +608,21 @@ function buildFanMap(){
     (groups[key]||(groups[key]=[])).push(e.id);
   });
   const fm={};
+  const STEP=52, BASE=20;
   Object.values(groups).forEach(ids=>{
     const n=ids.length;
-    ids.forEach((id,i)=>{
-      // fan offset: single edge = 0 (uses base curve), multiple = spread around 0
-      fm[id]=(n===1)?0:(i-(n-1)/2)*42;
-    });
+    const centerIdx=(n-1)/2;
+    // Compute fan values centered at BASE, symmetric
+    // Then shift so minimum is always ≥ 15 (never too flat)
+    const rawOffsets=ids.map((_,i)=>BASE+(i-centerIdx)*STEP);
+    const minRaw=Math.min(...rawOffsets);
+    const shift=minRaw<15?15-minRaw:0;
+    ids.forEach((id,i)=>{fm[id]=rawOffsets[i]+shift});
   });
   return fm;
 }
 
-// ── Edge path ─────────────────────────────────────────────────────────────────
-// Returns bezier path, label midpoint, and raw endpoints
-// Shortens path ends so arrowheads land outside the node rect
+// ── Edge path computation ─────────────────────────────────────────────────────
 function edgePath(e,fanOffset){
   const s=nodes.find(n=>n.id===e.s),t=nodes.find(n=>n.id===e.t);
   if(!s||!t) return null;
@@ -548,12 +644,8 @@ function edgePath(e,fanOffset){
   const mx=(x1+x2)/2,my=(y1+y2)/2;
   const len=Math.sqrt((x2-x1)**2+(y2-y1)**2)||1;
   const perpX=-(y2-y1)/len,perpY=(x2-x1)/len;
+  const cx=mx+perpX*fanOffset,cy=my+perpY*fanOffset;
 
-  // base curve 18px + fan offset
-  const totalOff=18+fanOffset;
-  const cx=mx+perpX*totalOff,cy=my+perpY*totalOff;
-
-  // shorten endpoints 8px toward control point so arrowhead renders outside node
   const ARROW=8;
   function shorten(px,py){
     const ddx=cx-px,ddy=cy-py,dl=Math.sqrt(ddx*ddx+ddy*ddy)||1;
@@ -564,21 +656,16 @@ function edgePath(e,fanOffset){
 
   return{
     path:`M${p1.x},${p1.y} Q${cx},${cy} ${p2.x},${p2.y}`,
-    lx:cx,ly:cy, // label position = bezier control point area
-    x1,y1,x2,y2,cx,cy
+    lx:cx,ly:cy,x1,y1,x2,y2,cx,cy
   };
 }
 
 // ── Render ────────────────────────────────────────────────────────────────────
 function render(){
   document.getElementById('empty').style.display=nodes.length?'none':'block';
-  renderEdges();
-  renderNodes();
-  renderEdgeHandles();
-  refreshSidebar();
+  renderEdges();renderNodes();renderEdgeHandles();refreshSidebar();
 }
 
-// ── Render edges ──────────────────────────────────────────────────────────────
 function renderEdges(){
   const fm=buildFanMap();
   const sel=edgeLayer.selectAll('.egrp').data(edges,d=>d.id);
@@ -591,7 +678,7 @@ function renderEdges(){
   const all=en.merge(sel);
 
   all.each(function(e){
-    const fo=fm[e.id]??0;
+    const fo=fm[e.id]??20;
     const info=edgePath(e,fo);
     if(!info) return;
     const{path,lx,ly}=info;
@@ -599,7 +686,6 @@ function renderEdges(){
     const isSel=e.id===selEdge;
     const g=d3.select(this);
 
-    // Wide invisible hit area for clicking
     g.select('.gedge-hit').attr('d',path)
       .on('click',ev=>{ev.stopPropagation();clickEdge(e.id)})
       .on('mousedown',ev=>{if(ev.button===0)ev.stopPropagation()})
@@ -613,12 +699,9 @@ function renderEdges(){
       .attr('stroke',isSel?'#e6edf3':es.color)
       .attr('stroke-width',isSel?2:1.5)
       .attr('stroke-dasharray',isSel?null:es.dash)
-      .attr('marker-end',mEnd)
-      .attr('marker-start',mStart)
-      .attr('opacity',isSel?1:.75)
-      .attr('pointer-events','none'); // hit path handles events
+      .attr('marker-end',mEnd).attr('marker-start',mStart)
+      .attr('opacity',isSel?1:.75).attr('pointer-events','none');
 
-    // Label background pill
     const lbl=e.type.replace(/_/g,' ');
     const lblW=lbl.length*5.2+12,lblH=12;
     g.select('.elbl-bg')
@@ -633,23 +716,20 @@ function renderEdges(){
       .attr('text-anchor','middle').attr('font-size',8)
       .attr('font-family','JetBrains Mono,monospace')
       .attr('fill',isSel?'#e6edf3':es.color)
-      .attr('opacity',isSel?1:.92)
-      .attr('pointer-events','none')
+      .attr('opacity',isSel?1:.92).attr('pointer-events','none')
       .text(lbl);
   });
 }
 
-// ── Edge endpoint handles ─────────────────────────────────────────────────────
 function renderEdgeHandles(){
   handleLayer.selectAll('*').remove();
   if(!selEdge) return;
   const e=edges.find(e=>e.id===selEdge);
   if(!e) return;
   const fm=buildFanMap();
-  const info=edgePath(e,fm[e.id]??0);
+  const info=edgePath(e,fm[e.id]??20);
   if(!info) return;
-  const sNode=nodes.find(n=>n.id===e.s);
-  const tNode=nodes.find(n=>n.id===e.t);
+  const sNode=nodes.find(n=>n.id===e.s),tNode=nodes.find(n=>n.id===e.t);
   if(!sNode||!tNode) return;
   const srcPt=e.sA?anchorAbs(sNode,e.sA):{x:info.x1,y:info.y1};
   const tgtPt=e.tA?anchorAbs(tNode,e.tA):{x:info.x2,y:info.y2};
@@ -660,14 +740,12 @@ function renderEdgeHandles(){
       .attr('class',active?'edge-h-pulse':'')
       .attr('cx',pt.x).attr('cy',pt.y).attr('r',active?7:5)
       .attr('stroke',col).attr('stroke-width',active?2:1.5)
-      .attr('fill',active?col+'28':'transparent')
-      .attr('cursor','pointer')
+      .attr('fill',active?col+'28':'transparent').attr('cursor','pointer')
       .on('mousedown',ev=>{ev.stopPropagation();ev.preventDefault()})
       .on('click',ev=>{ev.stopPropagation();startReconnect(end)});
   });
 }
 
-// ── Render nodes ──────────────────────────────────────────────────────────────
 function renderNodes(){
   const sel=nodeLayer.selectAll('.gnode').data(nodes,d=>d.id);
   sel.exit().remove();
@@ -675,37 +753,31 @@ function renderNodes(){
   const en=sel.enter().append('g').attr('class','gnode')
     .attr('transform',d=>`translate(${d.x},${d.y})`)
     .call(d3.drag()
-      .filter(ev=>!ev.target.classList.contains('anchor')&&ev.button===0)
+      .clickDistance(4) // must move 4px to count as drag (allows clean dblclick)
+      .filter(ev=>!ev.target.classList.contains('anchor')&&ev.button===0
+                  &&!ev.target.classList.contains('nx-bg'))
       .on('start',function(ev,d){
         if(connecting) return;
-        d3.select(this).raise();
-        tipFrozen=true;
+        d3.select(this).raise();tipFrozen=true;
       })
       .on('drag',function(ev,d){
         if(connecting) return;
         d.x+=ev.dx;d.y+=ev.dy;
         d3.select(this).attr('transform',`translate(${d.x},${d.y})`);
-        renderEdges();
-        renderEdgeHandles();
+        renderEdges();renderEdgeHandles();
       })
       .on('end',()=>{tipFrozen=false})
     )
-    // Tooltip: ALWAYS set position on mouseenter (freeze means no update on mousemove)
     .on('mouseenter',(ev,d)=>{
       const k=KINDS[d.kind]||KINDS.impl;
       tip.innerHTML=`<span style="color:${k.stroke};font-weight:700">${d.name}</span>`
         +(d.note?`<br><span style="color:#8b949e">${d.note}</span>`:'');
       tip.style.opacity=1;
-      // Always set position on enter — if frozen, this is where tip stays
       tip.style.left=(ev.clientX+16)+'px';
       tip.style.top=(ev.clientY-8)+'px';
     })
     .on('mousemove',ev=>{
-      // Only follow mouse when not frozen (frozen = another node being dragged)
-      if(!tipFrozen){
-        tip.style.left=(ev.clientX+16)+'px';
-        tip.style.top=(ev.clientY-8)+'px';
-      }
+      if(!tipFrozen){tip.style.left=(ev.clientX+16)+'px';tip.style.top=(ev.clientY-8)+'px';}
     })
     .on('mouseleave',()=>{tip.style.opacity=0});
 
@@ -717,11 +789,11 @@ function renderNodes(){
   // Badge
   en.append('rect').attr('class','bbg');
   en.append('text').attr('class','btxt').attr('pointer-events','none');
-  // Name + kind labels
+  // Name + kind
   en.append('text').attr('class','ntit').attr('pointer-events','none');
   en.append('text').attr('class','nknd').attr('pointer-events','none');
 
-  // Delete button (circle + ×)
+  // Delete btn (circle hit + × text)
   en.append('circle').attr('class','nx-bg')
     .attr('cx',NW-10).attr('cy',10).attr('r',8)
     .attr('fill','transparent').attr('cursor','pointer')
@@ -739,11 +811,10 @@ function renderNodes(){
     .attr('x',NW-10).attr('y',14.5).attr('text-anchor','middle')
     .attr('fill','#3d444d').attr('font-size',12).attr('pointer-events','none').text('×');
 
-  // Invisible rect over name for dblclick to edit
+  // Name dblclick edit target — NO mousedown stopPropagation so drag works
   en.append('rect').attr('class','name-edit-hit')
-    .attr('x',8).attr('y',14).attr('width',NW-26).attr('height',18)
-    .attr('fill','transparent').attr('cursor','text')
-    .on('mousedown',ev=>ev.stopPropagation())
+    .attr('x',8).attr('y',13).attr('width',NW-26).attr('height',20)
+    .attr('fill','transparent').attr('cursor','default')
     .on('dblclick',(ev,d)=>{ev.stopPropagation();startNodeEdit(d,ev)});
 
   // Anchors
@@ -752,21 +823,14 @@ function renderNodes(){
     en.append('circle').attr('class','anchor')
       .attr('cx',o.x).attr('cy',o.y).attr('r',5).attr('data-side',side)
       .on('mousedown',ev=>{ev.stopPropagation();ev.preventDefault()})
-      .on('mouseenter',function(ev,d){
-        ev.stopPropagation();tip.style.opacity=0;
-        d3.select(this).attr('r',7);
-      })
+      .on('mouseenter',function(ev,d){ev.stopPropagation();tip.style.opacity=0;d3.select(this).attr('r',7)})
       .on('mouseleave',function(ev,d){
         const isActive=connecting?.nodeId===d.id&&connecting?.side===this.getAttribute('data-side');
         d3.select(this).attr('r',isActive?6:5);
       })
-      .on('click',function(ev,d){
-        ev.stopPropagation();
-        onAnchorClick(d,this.getAttribute('data-side'));
-      });
+      .on('click',function(ev,d){ev.stopPropagation();onAnchorClick(d,this.getAttribute('data-side'))});
   });
 
-  // Update all
   const all=en.merge(sel);
   all.attr('transform',d=>`translate(${d.x},${d.y})`);
 
@@ -776,34 +840,25 @@ function renderNodes(){
     const isSrc=connecting?.nodeId===d.id;
 
     g.select('.gl').attr('fill',k.stroke);
-    g.select('.bd').attr('fill',k.fill)
-      .attr('stroke',isSrc?'#e6edf3':k.stroke)
-      .attr('stroke-width',isSrc?2:1.5);
+    g.select('.bd').attr('fill',k.fill).attr('stroke',isSrc?'#e6edf3':k.stroke).attr('stroke-width',isSrc?2:1.5);
 
     const bl=k.label.length*6+10;
     g.select('.bbg').attr('x',7).attr('y',-9).attr('width',bl).attr('height',14).attr('rx',3)
       .attr('fill',k.fill).attr('stroke',k.stroke).attr('stroke-width',1);
-    g.select('.btxt').attr('x',12).attr('y',1)
-      .attr('fill',k.stroke).attr('font-size',7.5).attr('font-weight',700).text(k.label);
+    g.select('.btxt').attr('x',12).attr('y',1).attr('fill',k.stroke).attr('font-size',7.5).attr('font-weight',700).text(k.label);
 
-    g.select('.ntit').attr('x',NW/2).attr('y',26)
-      .attr('text-anchor','middle').attr('fill','#e6edf3')
-      .attr('font-size',11).attr('font-weight',700)
+    g.select('.ntit').attr('x',NW/2).attr('y',26).attr('text-anchor','middle')
+      .attr('fill','#e6edf3').attr('font-size',11).attr('font-weight',700)
       .text(d.name.length>21?d.name.slice(0,19)+'…':d.name);
 
-    g.select('.nknd').attr('x',NW/2).attr('y',42)
-      .attr('text-anchor','middle').attr('fill',k.stroke)
-      .attr('font-size',8).attr('opacity',.5).text(k.label);
+    g.select('.nknd').attr('x',NW/2).attr('y',42).attr('text-anchor','middle')
+      .attr('fill',k.stroke).attr('font-size',8).attr('opacity',.5).text(k.label);
 
-    g.selectAll('.anchor')
-      .attr('fill',k.stroke).attr('fill-opacity',.25)
-      .attr('stroke',k.stroke).attr('stroke-width',1.5);
-
+    g.selectAll('.anchor').attr('fill',k.stroke).attr('fill-opacity',.25).attr('stroke',k.stroke).attr('stroke-width',1.5);
     if(isSrc){
       g.selectAll('.anchor').style('opacity','1');
       g.selectAll('.anchor').each(function(){
-        if(this.getAttribute('data-side')===connecting.side)
-          d3.select(this).attr('fill-opacity',1).attr('r',6);
+        if(this.getAttribute('data-side')===connecting.side) d3.select(this).attr('fill-opacity',1).attr('r',6);
       });
     }
     if(reconnectMode) g.selectAll('.anchor').style('opacity','1');
@@ -815,18 +870,15 @@ function startNodeEdit(d,ev){
   editingNodeId=d.id;
   const transform=d3.zoomTransform(svgEl);
   const ctm=svgEl.getScreenCTM();
-
-  // Map node top-left from root-space to screen space
   const screenX=ctm.a*(transform.x+d.x*transform.k)+ctm.e;
   const screenY=ctm.d*(transform.y+d.y*transform.k)+ctm.f;
   const nodeW=NW*transform.k*ctm.a;
-
   const editor=document.getElementById('nodeEditor');
   const inp=document.getElementById('nodeEditorInput');
   inp.value=d.name;
   inp.style.fontSize=Math.max(9,11*transform.k)+'px';
   editor.style.left=screenX+'px';
-  editor.style.top=(screenY+(14*transform.k*ctm.d))+'px';
+  editor.style.top=(screenY+(13*transform.k*ctm.d))+'px';
   editor.style.width=nodeW+'px';
   editor.style.display='block';
   inp.focus();inp.select();
@@ -842,18 +894,14 @@ function commitNodeEdit(){
   render();
 }
 
-const nodeEditorInput=document.getElementById('nodeEditorInput');
-nodeEditorInput.addEventListener('keydown',ev=>{
+document.getElementById('nodeEditorInput').addEventListener('keydown',ev=>{
   ev.stopPropagation();
   if(ev.key==='Enter'){commitNodeEdit();ev.preventDefault()}
-  if(ev.key==='Escape'){
-    document.getElementById('nodeEditor').style.display='none';
-    editingNodeId=null;
-  }
+  if(ev.key==='Escape'){document.getElementById('nodeEditor').style.display='none';editingNodeId=null;}
 });
-nodeEditorInput.addEventListener('blur',commitNodeEdit);
+document.getElementById('nodeEditorInput').addEventListener('blur',commitNodeEdit);
 
-// ── Connect / reconnect logic ─────────────────────────────────────────────────
+// ── Anchor connect / reconnect ────────────────────────────────────────────────
 function onAnchorClick(d,side){
   if(reconnectMode){
     const{edgeId,end}=reconnectMode;
@@ -871,8 +919,7 @@ function onAnchorClick(d,side){
     render();
   } else if(connecting.nodeId!==d.id){
     ensureMarker(activeType);
-    edges.push({id:'e'+(++uid),s:connecting.nodeId,t:d.id,
-      sA:connecting.side,tA:side,type:activeType,headS:false,headT:false});
+    edges.push({id:'e'+(++uid),s:connecting.nodeId,t:d.id,sA:connecting.side,tA:side,type:activeType,headS:false,headT:false});
     cancelConnect(false);render();
   } else {
     connecting.side=side;render();
@@ -880,14 +927,12 @@ function onAnchorClick(d,side){
 }
 
 function cancelConnect(doRender=true){
-  connecting=null;
-  prevLine.attr('opacity',0);
+  connecting=null;prevLine.attr('opacity',0);
   document.getElementById('panelConnect').classList.remove('show');
   setMode('idle','MID/RIGHT DRAG PAN · SCROLL ZOOM · HOVER NODE ◉ CONNECT · F FOCUS');
   if(doRender) render();
 }
 
-// ── Edge select ───────────────────────────────────────────────────────────────
 function clickEdge(id){
   reconnectMode=null;
   selEdge=(selEdge===id)?null:id;
@@ -922,9 +967,7 @@ function toggleHead(end){
 
 function startReconnect(end){
   if(!selEdge) return;
-  if(reconnectMode?.edgeId===selEdge&&reconnectMode?.end===end){
-    reconnectMode=null;updateReconnectUI();render();return;
-  }
+  if(reconnectMode?.edgeId===selEdge&&reconnectMode?.end===end){reconnectMode=null;updateReconnectUI();render();return;}
   reconnectMode={edgeId:selEdge,end};
   updateReconnectUI();render();
   setMode('reconnecting',`CLICK ANY ANCHOR TO MOVE EDGE ${end==='s'?'SOURCE':'TARGET'} · ESC CANCEL`);
@@ -950,9 +993,7 @@ function delNode(id){
   nodes=nodes.filter(n=>n.id!==id);
   edges=edges.filter(e=>e.s!==id&&e.t!==id);
   if(connecting?.nodeId===id) cancelConnect(false);
-  if(selEdge&&!edges.find(e=>e.id===selEdge)){
-    selEdge=null;document.getElementById('panelSel').classList.remove('show');
-  }
+  if(selEdge&&!edges.find(e=>e.id===selEdge)){selEdge=null;document.getElementById('panelSel').classList.remove('show');}
   render();
 }
 
@@ -976,7 +1017,6 @@ svg.on('click.bg',function(ev){
   }
 });
 
-// ── Keyboard ──────────────────────────────────────────────────────────────────
 document.addEventListener('keydown',ev=>{
   if(document.activeElement.tagName==='INPUT'||document.activeElement.tagName==='TEXTAREA') return;
   if(ev.key==='Escape'){
@@ -992,7 +1032,6 @@ document.addEventListener('keydown',ev=>{
   if(i>=0&&i<types.length) setType(types[i]);
 });
 
-// ── Focus all ─────────────────────────────────────────────────────────────────
 function focusAll(){
   if(!nodes.length) return;
   const pad=80;
@@ -1002,14 +1041,57 @@ function focusAll(){
   const W=mainEl.clientWidth,H=mainEl.clientHeight;
   const scale=Math.min(W/(x1-x0),H/(y1-y0),3);
   const tx=(W-scale*(x0+x1))/2,ty=(H-scale*(y0+y1))/2;
-  svg.transition().duration(500)
-    .call(zoom.transform,d3.zoomIdentity.translate(tx,ty).scale(scale));
+  svg.transition().duration(500).call(zoom.transform,d3.zoomIdentity.translate(tx,ty).scale(scale));
 }
 
 function setMode(cls,txt){
   const el=document.getElementById('modebar');
   el.className=cls==='idle'?'':cls;el.textContent=txt;
 }
+
+// ── Resizable sidebars ────────────────────────────────────────────────────────
+(function(){
+  // Left sidebar
+  const leftHandle=document.getElementById('leftResizeHandle');
+  let lDragging=false,lStartX=0,lStartW=0;
+  leftHandle.addEventListener('mousedown',ev=>{
+    lDragging=true;lStartX=ev.clientX;
+    lStartW=document.getElementById('leftSidebar').offsetWidth;
+    document.body.classList.add('resizing');
+    leftHandle.classList.add('dragging');
+    ev.preventDefault();
+  });
+  window.addEventListener('mousemove',ev=>{
+    if(!lDragging) return;
+    const newW=Math.max(180,Math.min(500,lStartW+(ev.clientX-lStartX)));
+    document.body.style.gridTemplateColumns=`${newW}px 1fr`;
+  });
+  window.addEventListener('mouseup',()=>{
+    if(!lDragging) return;
+    lDragging=false;document.body.classList.remove('resizing');leftHandle.classList.remove('dragging');
+  });
+
+  // Right DSL panel
+  const rightHandle=document.getElementById('dslResizeHandle');
+  let rDragging=false,rStartX=0,rStartW=0;
+  rightHandle.addEventListener('mousedown',ev=>{
+    if(!document.getElementById('dslPanel').classList.contains('open')) return;
+    rDragging=true;rStartX=ev.clientX;
+    rStartW=document.getElementById('dslPanel').offsetWidth;
+    document.body.classList.add('resizing');
+    rightHandle.classList.add('dragging');
+    ev.preventDefault();ev.stopPropagation();
+  });
+  window.addEventListener('mousemove',ev=>{
+    if(!rDragging) return;
+    const newW=Math.max(220,Math.min(600,rStartW-(ev.clientX-rStartX)));
+    document.getElementById('dslPanel').style.width=newW+'px';
+  });
+  window.addEventListener('mouseup',()=>{
+    if(!rDragging) return;
+    rDragging=false;document.body.classList.remove('resizing');rightHandle.classList.remove('dragging');
+  });
+})();
 
 // ── DSL Panel ─────────────────────────────────────────────────────────────────
 function toggleDSL(){
@@ -1018,13 +1100,75 @@ function toggleDSL(){
 }
 
 function toggleExample(){
-  const tog=document.getElementById('exToggle');
-  const body=document.getElementById('exBody');
-  tog.classList.toggle('open');
-  body.classList.toggle('show');
+  document.getElementById('exToggle').classList.toggle('open');
+  document.getElementById('exBody').classList.toggle('show');
 }
 
-// ── DSL Parser ────────────────────────────────────────────────────────────────
+// ── DSL Syntax Highlighting ───────────────────────────────────────────────────
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+function highlightDSLLine(line){
+  if(!line.trim()) return '\n';
+  if(line.trim().startsWith('#')) return `<span class="dh-comment">${escHtml(line)}</span>\n`;
+
+  // Arrow: optional< optional_spaces dash optional_spaces (type) optional_spaces dash optional_spaces optional>
+  // We split the line on the arrow pattern
+  const arrowRe=/(<?\s*[-–]\s*\([^)]+\)\s*[-–]\s*>?)/;
+  const parts=line.split(arrowRe);
+  if(parts.length<3) return `<span class="dh-err">${escHtml(line)}</span>\n`;
+
+  const nodeA=parts[0];
+  const arrow=parts[1];
+  const nodeB=parts[2];
+
+  // Parse arrow internals
+  const am=arrow.match(/^(<)?\s*([-–])\s*\(([^)]+)\)\s*([-–])\s*(>)?$/);
+  let arrowHtml;
+  if(am){
+    const[,lt,d1,type,d2,rt]=am;
+    arrowHtml=`<span class="dh-tip">${escHtml(lt||'')}</span>`+
+      `<span class="dh-dash">${escHtml(d1)}</span>`+
+      `<span class="dh-paren">(</span><span class="dh-type">${escHtml(type)}</span><span class="dh-paren">)</span>`+
+      `<span class="dh-dash">${escHtml(d2)}</span>`+
+      `<span class="dh-tip">${escHtml(rt||'')}</span>`;
+  } else {
+    arrowHtml=`<span class="dh-dash">${escHtml(arrow)}</span>`;
+  }
+
+  return `<span class="dh-node">${escHtml(nodeA.trimEnd())}</span>`+
+    (nodeA!==nodeA.trimEnd()?escHtml(nodeA.slice(nodeA.trimEnd().length)):'')+
+    arrowHtml+
+    `<span class="dh-node2">${escHtml(nodeB.trimStart())}</span>\n`;
+}
+
+function updateDSLHighlight(){
+  const ta=document.getElementById('dslInput');
+  const hl=document.getElementById('dslHighlight');
+  const lines=ta.value.split('\n');
+  // Build highlighted HTML. Must end with extra line to match textarea scrollHeight
+  hl.innerHTML=lines.map(highlightDSLLine).join('')+' ';
+  hl.scrollTop=ta.scrollTop;hl.scrollLeft=ta.scrollLeft;
+}
+
+const dslInput=document.getElementById('dslInput');
+const dslHighlight=document.getElementById('dslHighlight');
+dslInput.addEventListener('input',updateDSLHighlight);
+dslInput.addEventListener('scroll',()=>{
+  dslHighlight.scrollTop=dslInput.scrollTop;
+  dslHighlight.scrollLeft=dslInput.scrollLeft;
+});
+dslInput.addEventListener('keydown',ev=>{
+  // Allow Tab insertion
+  if(ev.key==='Tab'){
+    ev.preventDefault();
+    const s=dslInput.selectionStart,e=dslInput.selectionEnd;
+    dslInput.value=dslInput.value.slice(0,s)+'  '+dslInput.value.slice(e);
+    dslInput.selectionStart=dslInput.selectionEnd=s+2;
+    updateDSLHighlight();
+  }
+});
+
+// ── DSL Parser — lenient, spaces optional ────────────────────────────────────
 function guessKind(name){
   if(/^I[A-Z]/.test(name)) return 'interface';
   if(/[Tt]est(er)?$|[Ss]pec$/.test(name)) return 'tester';
@@ -1033,24 +1177,24 @@ function guessKind(name){
 }
 
 function parseDSL(replace){
-  const text=document.getElementById('dslInput').value.trim();
+  const text=dslInput.value.trim();
   if(!text) return;
   if(replace) clearAll();
 
   const lines=text.split('\n').map(l=>l.trim()).filter(l=>l&&!l.startsWith('#'));
   const newNames=new Set(),newEdges=[];
 
-  // Match: A <-(type)-> B  or  A -(type)-> B  or  A -(type)- B  etc.
-  // With parens OR without (allow spaces in type when using parens)
-  const reParen=/^(.+?)\s+(<?)[-–]\((.+?)\)-?(>?)\s+(.+)$/;
-  const rePlain=/^(.+?)\s+(<?)[-–]([\w]+)[-–](>?)\s+(.+)$/;
+  // Very lenient pattern: handles any amount of whitespace, including none
+  // Captures: nodeA, optional <, type (in parens), optional >, nodeB
+  // Format: A<optional_spaces><optional_lt><optional_spaces>-<optional_spaces>(type)<optional_spaces>-<optional_spaces><optional_gt><optional_spaces>B
+  const re=/^\s*(.+?)\s*(<)?\s*[-–]\s*\(([^)]+)\)\s*[-–]\s*(>)?\s*(.+?)\s*$/;
 
   for(const line of lines){
-    const m=line.match(reParen)||line.match(rePlain);
+    const m=line.match(re);
     if(!m) continue;
     const[,rawA,lt,rawType,rt,rawB]=m;
     const A=rawA.trim(),B=rawB.trim();
-    const type=rawType.trim().toLowerCase().replace(/[\s-]+/g,'_');
+    const type=rawType.trim().toLowerCase().replace(/[\s\-]+/g,'_');
     newNames.add(A);newNames.add(B);
     newEdges.push({src:A,tgt:B,type,headS:lt==='<',headT:rt==='>'});
   }
@@ -1074,24 +1218,98 @@ function parseDSL(replace){
     edges.push({id:'e'+(++uid),s:s.id,t:t.id,type,headS,headT});
   });
 
-  render();
-  setTimeout(focusAll,80);
+  render();setTimeout(focusAll,80);
+}
+
+// ── Export ────────────────────────────────────────────────────────────────────
+function openExportModal(){
+  const m=document.getElementById('exportModal');
+  m.style.display='flex';
+  // Show/hide PNG options based on format
+  m.querySelectorAll('input[name=expFmt]').forEach(r=>{
+    r.addEventListener('change',()=>{
+      document.getElementById('pngOpts').style.display=r.value==='png'?'block':'none';
+    });
+  });
+  document.getElementById('pngOpts').style.display=
+    m.querySelector('input[name=expFmt]:checked')?.value==='png'?'block':'none';
+}
+function closeExportModal(){document.getElementById('exportModal').style.display='none'}
+
+function doExport(){
+  const fmt=document.querySelector('input[name=expFmt]:checked')?.value||'svg';
+  if(fmt==='svg'){exportSVG();closeExportModal();return;}
+  const scale=parseFloat(document.querySelector('input[name=expScale]:checked')?.value||'2');
+  exportPNG(scale);closeExportModal();
+}
+
+function exportSVG(){
+  const src='<?xml version="1.0" standalone="no"?>\n'+svgEl.outerHTML;
+  const a=document.createElement('a');
+  a.href='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(src);
+  a.download='dependency-graph.svg';a.click();
+}
+
+function exportPNG(scale=2){
+  if(!nodes.length){alert('Nothing to export — add some nodes first.');return;}
+  // Get bounding box from root group
+  const bbox=root.node().getBBox();
+  const pad=60;
+  const vx=bbox.x-pad,vy=bbox.y-pad,vw=bbox.width+pad*2,vh=bbox.height+pad*2;
+
+  // Clone SVG, reset transform, set viewBox to content
+  const svgClone=svgEl.cloneNode(true);
+  svgClone.setAttribute('viewBox',`${vx} ${vy} ${vw} ${vh}`);
+  svgClone.setAttribute('width',vw*scale);
+  svgClone.setAttribute('height',vh*scale);
+  svgClone.style.background='#0d1117';
+
+  // Reset root group transform (since viewBox handles positioning now)
+  const rootG=svgClone.querySelector('#root');
+  if(rootG) rootG.removeAttribute('transform');
+
+  // Inject background rect
+  const bgRect=document.createElementNS('http://www.w3.org/2000/svg','rect');
+  bgRect.setAttribute('x',vx);bgRect.setAttribute('y',vy);
+  bgRect.setAttribute('width',vw);bgRect.setAttribute('height',vh);
+  bgRect.setAttribute('fill','#0d1117');
+  rootG?.insertBefore(bgRect,rootG.firstChild);
+
+  const svgStr=new XMLSerializer().serializeToString(svgClone);
+  const blob=new Blob([svgStr],{type:'image/svg+xml;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+
+  const img=new Image();
+  img.onload=()=>{
+    const canvas=document.createElement('canvas');
+    canvas.width=Math.round(vw*scale);canvas.height=Math.round(vh*scale);
+    const ctx=canvas.getContext('2d');
+    ctx.fillStyle='#0d1117';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(img,0,0);
+    URL.revokeObjectURL(url);
+    canvas.toBlob(b=>{
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(b);
+      a.download=`dependency-graph-${scale}x.png`;
+      a.click();
+    },'image/png');
+  };
+  img.onerror=()=>{alert('PNG export failed. Try SVG instead.');URL.revokeObjectURL(url);}
+  img.src=url;
 }
 
 // ── Pills ─────────────────────────────────────────────────────────────────────
 function rebuildPills(){
-  const el=document.getElementById('etypePills');
-  el.innerHTML='';
+  const el=document.getElementById('etypePills');el.innerHTML='';
   Object.entries(ETYPES).forEach(([type,s],i)=>{
     const b=document.createElement('button');
     b.className='epill'+(type===activeType?' on':'');
     b.textContent=`${i+1}. ${type}`;
-    b.dataset.type=type;
-    b.style.borderColor=s.color;
+    b.dataset.type=type;b.style.borderColor=s.color;
     b.style.color=type===activeType?'#0d1117':s.color;
     if(type===activeType)b.style.background=s.color;
-    b.onclick=()=>setType(type);
-    el.appendChild(b);
+    b.onclick=()=>setType(type);el.appendChild(b);
   });
 }
 rebuildPills();
@@ -1099,20 +1317,16 @@ rebuildPills();
 function setType(type){
   activeType=type;
   document.querySelectorAll('.epill').forEach(b=>{
-    const t=b.dataset.type,s=ETYPES[t];
-    if(!s) return;
+    const t=b.dataset.type,s=ETYPES[t];if(!s) return;
     const on=t===type;
-    b.classList.toggle('on',on);
-    b.style.background=on?s.color:'transparent';
-    b.style.color=on?'#0d1117':s.color;
+    b.classList.toggle('on',on);b.style.background=on?s.color:'transparent';b.style.color=on?'#0d1117':s.color;
   });
   prevLine.attr('stroke',ETYPES[type]?.color||'#58a6ff');
 }
 
 // ── Legend ────────────────────────────────────────────────────────────────────
 function rebuildLegendEdges(){
-  const eEl=document.getElementById('legEdges');
-  eEl.innerHTML='';
+  const eEl=document.getElementById('legEdges');eEl.innerHTML='';
   Object.entries(ETYPES).forEach(([type,s])=>{
     const d=document.createElement('div');d.className='leg-item';
     const sv=document.createElementNS('http://www.w3.org/2000/svg','svg');
@@ -1128,7 +1342,6 @@ function rebuildLegendEdges(){
     d.appendChild(sv);d.appendChild(sp);eEl.appendChild(d);
   });
 }
-
 (function(){
   rebuildLegendEdges();
   const kEl=document.getElementById('legKinds');
@@ -1141,8 +1354,7 @@ function rebuildLegendEdges(){
 
 // ── Sidebar ───────────────────────────────────────────────────────────────────
 function refreshSidebar(){
-  const list=document.getElementById('nodeList');
-  list.innerHTML='';
+  const list=document.getElementById('nodeList');list.innerHTML='';
   nodes.forEach(n=>{
     const k=KINDS[n.kind]||KINDS.impl;
     const d=document.createElement('div');d.className='node-item';
@@ -1155,9 +1367,7 @@ function refreshSidebar(){
   ['eFrom','eTo'].forEach(id=>{
     const s=document.getElementById(id),cur=s.value;
     s.innerHTML='<option value="">— node —</option>';
-    nodes.forEach(n=>{
-      const o=document.createElement('option');o.value=n.id;o.textContent=n.name;s.appendChild(o);
-    });
+    nodes.forEach(n=>{const o=document.createElement('option');o.value=n.id;o.textContent=n.name;s.appendChild(o)});
     s.value=cur;
   });
 }
@@ -1199,12 +1409,10 @@ function clearAll(){
 }
 
 function flash(id){
-  const el=document.getElementById(id);
-  el.style.borderColor='#f78166';
+  const el=document.getElementById(id);el.style.borderColor='#f78166';
   setTimeout(()=>el.style.borderColor='',700);
 }
 
-// ── Example ───────────────────────────────────────────────────────────────────
 function loadExample(){
   clearAll();
   const cx=mainEl.clientWidth/2,cy=mainEl.clientHeight/2;
@@ -1218,44 +1426,41 @@ function loadExample(){
     {name:'Image (×2)',       kind:'external', x:cx+30, y:cy+170,note:'healthFill + armorFill'},
     {name:'TMP_Text',         kind:'external', x:cx+230,y:cy+170,note:'HP / Armor label'},
   ].forEach(n=>nodes.push({id:'n'+(++uid),...n}));
-
   const id=name=>nodes.find(n=>n.name===name)?.id;
   [
     ['EntityStats','IHealthSystem','top','bottom','implements',false,true],
     ['StackedHealthBar','IHealthBarView','top','bottom','implements',false,true],
     ['HealthSystemTester','IHealthSystem','right','left','uses',false,true],
     ['StackedHealthBar','EntityStats','left','right','event',true,true],
-    // second edge same pair as above → will fan automatically
-    ['StackedHealthBar','EntityStats','left','right','calls',false,true],
+    ['StackedHealthBar','EntityStats','left','right','calls',false,true], // fan test: 2 edges same anchor pair
     ['PlayerStats','EntityStats','top','bottom','extends',false,true],
     ['StackedHealthBar','Image (×2)','bottom','top','contains',false,false],
     ['StackedHealthBar','TMP_Text','bottom','top','contains',false,false],
   ].forEach(([s,t,sA,tA,type,headS,headT])=>{
-    ensureMarker(type);
-    edges.push({id:'e'+(++uid),s:id(s),t:id(t),sA,tA,type,headS,headT});
+    ensureMarker(type);edges.push({id:'e'+(++uid),s:id(s),t:id(t),sA,tA,type,headS,headT});
   });
-
-  // Pre-fill DSL panel with matching example
-  document.getElementById('dslInput').value=
-`HealthSystemTester -(uses)-> IHealthSystem
-EntityStats -(implements)-> IHealthSystem
+  dslInput.value=
+`HealthSystemTester-(uses)->IHealthSystem
+EntityStats-(implements)->IHealthSystem
 EntityStats <-(event)-> StackedHealthBar
-StackedHealthBar -(contains)-> TMP_Text
-PlayerStats -(extends)-> EntityStats`;
-
-  render();
-  setTimeout(focusAll,80);
-}
-
-function exportSVG(){
-  const src='<?xml version="1.0" standalone="no"?>\n'+svgEl.outerHTML;
-  const a=document.createElement('a');
-  a.href='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(src);
-  a.download='dependency-graph.svg';a.click();
+StackedHealthBar-(contains)->TMP_Text
+PlayerStats-(extends)->EntityStats`;
+  updateDSLHighlight();
+  render();setTimeout(focusAll,80);
 }
 
 document.getElementById('nName').addEventListener('keydown',e=>{if(e.key==='Enter')addNode()});
+
+// Export modal: show/hide PNG options on format change
+document.querySelectorAll('input[name=expFmt]').forEach(r=>{
+  r.addEventListener('change',()=>{
+    document.getElementById('pngOpts').style.display=r.value==='png'?'block':'none';
+  });
+});
+document.getElementById('pngOpts').style.display='none'; // default to SVG
+
 render();
+updateDSLHighlight();
 </script>
 </body>
 </html>
