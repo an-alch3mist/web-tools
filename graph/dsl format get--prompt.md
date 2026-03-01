@@ -1,8 +1,4 @@
-**Improved Prompt:**
-
----
-
-Analyze [Scripts] and output a Unity3D dependency graph in DSL format.
+## Analyze [Scripts] and output a Unity3D dependency graph in DSL format.
 
 DSL Rules:
 - One relationship per line

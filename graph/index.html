@@ -1781,13 +1781,13 @@ dslInput.addEventListener('keydown',ev=>{
 
 // ── DSL Parser — lenient, spaces optional ────────────────────────────────────
 function guessKind(name){
-	if(/^I[A-Z]/.test(name)) 
-		return 'interface';
-  	if(/[Tt]est(er)?$|[Ss]pec$|[Dd]emo$|[Cc]heck$/.test(name))
-		return 'tester';
-	if(/^(Image|Text|TMP|Unity|GameObject|MonoBehaviour|Rigidbody|Transform|Canvas|AudioSource)/i.test(name)) 
-		return 'external';
-	return 'impl';
+    if(/^I[A-Z]|Base$/.test(name)) 
+        return 'interface';
+    if(/[Tt]est(er)?$|[Ss]pec$|[Dd]emo$|[Cc]heck$/.test(name))
+        return 'tester';
+    if(/^(Image|Text|TMP|Unity|GameObject|MonoBehaviour|Rigidbody|Transform|Canvas|AudioSource)/i.test(name)) 
+        return 'external';
+    return 'impl';
 }
 
 function parseDSL(replace){

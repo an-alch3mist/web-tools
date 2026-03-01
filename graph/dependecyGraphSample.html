@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stacked Health System — Dependency Graph</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0d1117;
+    color: #e6edf3;
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 36px 24px 48px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  header .eyebrow {
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #6e7681;
+    margin-bottom: 8px;
+  }
+  header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #e6edf3;
+    letter-spacing: -0.5px;
+  }
+  header p {
+    font-size: 11px;
+    color: #8b949e;
+    margin-top: 4px;
+  }
+
+  #chart-wrap {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 14px;
+    padding: 12px;
+    box-shadow: 0 12px 48px #00000099;
+    overflow: hidden;
+  }
+
+  svg text { font-family: 'JetBrains Mono', monospace; }
+
+  /* node rects */
+  .node rect {
+    transition: filter 0.15s, stroke 0.15s, stroke-width 0.15s;
+    cursor: pointer;
+  }
+  .node:hover rect { filter: brightness(1.25); }
+
+  /* arrows */
+  .link { fill: none; }
+
+  /* legend */
+  #legend {
+    margin-top: 22px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    color: #8b949e;
+  }
+  .legend-line {
+    width: 38px;
+    height: 2px;
+    border-radius: 2px;
+    position: relative;
+  }
+  .legend-line::after {
+    content: '';
+    position: absolute;
+    right: -1px; top: 50%;
+    transform: translateY(-50%);
+    border-left: 6px solid;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+  }
+  .legend-dot {
+    width: 12px; height: 12px;
+    border-radius: 3px;
+    border: 1.5px solid;
+  }
+
+  /* tooltip */
+  #tooltip {
+    position: fixed;
+    background: #1c2330;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 11px;
+    color: #e6edf3;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.12s;
+    max-width: 260px;
+    z-index: 100;
+    line-height: 1.7;
+  }
+  #tooltip .tt-title { font-weight: 700; font-size: 12px; margin-bottom: 4px; }
+  #tooltip .tt-kind  { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
+  #tooltip .tt-desc  { color: #8b949e; font-size: 10px; }
+  #tooltip .tt-members { margin-top: 8px; }
+  #tooltip .tt-member {
+    color: #58a6ff;
+    font-size: 9.5px;
+    padding: 1px 0;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Unity3D · C# · Interface-Based Architecture</div>
+  <h1>Stacked Health System</h1>
+  <p>Dependency Graph — hover nodes for details</p>
+</header>
+
+<div id="chart-wrap">
+  <svg id="diagram"></svg>
+</div>
+
+<div id="legend"></div>
+<div id="tooltip"></div>
+
+<script>
+// ── Data ──────────────────────────────────────────────────────────────────────
+
+const NODES = [
+  {
+    id: "IHealthSystem",
+    kind: "interface",
+    layer: 0,
+    col: 1,
+    title: "IHealthSystem",
+    subtitle: "Health + Armor contract",
+    members: ["CurrentHealth", "MaxHealth", "CurrentArmor", "MaxArmor", "IsDead",
+              "OnStatsChanged", "OnDeath", "OnRevive",
+              "TakeDamage(float)", "HealHealth(float)", "RestoreArmor(float)", "Revive(float)"],
+    desc: "Single interface covering all health-related behaviour. Any consumer (projectile, pickup, AI) talks through this contract only."
+  },
+  {
+    id: "IHealthBarView",
+    kind: "interface",
+    layer: 0,
+    col: 3,
+    title: "IHealthBarView",
+    subtitle: "UI display contract",
+    members: ["OnHealthChanged(float, float)", "OnArmorChanged(float, float)"],
+    desc: "Decouples the visual bar from data. Swap world-space, HUD, or minimap without touching EntityStats."
+  },
+  {
+    id: "EntityStats",
+    kind: "impl",
+    layer: 1,
+    col: 1,
+    title: "EntityStats",
+    subtitle: "MonoBehaviour · implements IHealthSystem",
+    members: ["Armor absorbs first → overflow bleeds to HP",
+              "NotifyChanged() → OnStatsChanged event",
+              "Die() / Revive()"],
+    desc: "Core stats component. Routes damage through armor layer first. Fires OnStatsChanged on every state mutation."
+  },
+  {
+    id: "StackedHealthBar",
+    kind: "impl",
+    layer: 1,
+    col: 3,
+    title: "StackedHealthBar",
+    subtitle: "MonoBehaviour · implements IHealthBarView",
+    members: ["healthFill (Image, RED)", "armorFill (Image, BLUE)",
+              "Lerp fill amounts each Update()", "Bind(EntityStats) / Unbind()"],
+    desc: "Renders the stacked bar. Blue armor on top, red health below. Subscribes to EntityStats.OnStatsChanged."
+  },
+  {
+    id: "Tester",
+    kind: "tester",
+    layer: 1,
+    col: 0,
+    title: "HealthSystemTester",
+    subtitle: "MonoBehaviour · test harness",
+    members: ["Q → TakeDamage(15)", "W → TakeDamage(60)", "E → HealHealth(20)",
+              "R → RestoreArmor(25)", "T → Revive(0.5f)"],
+    desc: "Play Mode test harness. Talks only to IHealthSystem — the concrete EntityStats type is never referenced after Awake."
+  },
+  {
+    id: "Image",
+    kind: "external",
+    layer: 2,
+    col: 2,
+    title: "UnityEngine.UI.Image",
+    subtitle: "Unity built-in",
+    members: ["type = Filled", "fillMethod = Horizontal", "fillAmount (0–1)", "color"],
+    desc: "Standard Unity UI Image used for both health (red) and armor (blue) fill bars."
+  },
+  {
+    id: "TMPText",
+    kind: "external",
+    layer: 2,
+    col: 3,
+    title: "TMP_Text",
+    subtitle: "TextMeshPro built-in",
+    members: ["text — numeric readout", "\"80/100  🛡 30\""],
+    desc: "Optional label showing current HP and armor numbers."
+  },
+];
+
+const EDGES = [
+  { source: "EntityStats",      target: "IHealthSystem",   type: "implements",    label: "implements" },
+  { source: "StackedHealthBar", target: "IHealthBarView",  type: "implements",    label: "implements" },
+  { source: "StackedHealthBar", target: "EntityStats",     type: "event",         label: "OnStatsChanged" },
+  { source: "Tester",           target: "IHealthSystem",   type: "uses",          label: "uses (interface)" },
+  { source: "StackedHealthBar", target: "Image",           type: "contains",      label: "healthFill + armorFill" },
+  { source: "StackedHealthBar", target: "TMPText",         type: "contains",      label: "label" },
+];
+
+// ── Visual config ─────────────────────────────────────────────────────────────
+
+const KIND = {
+  interface: { fill: "#1f3d5c", stroke: "#58a6ff", text: "#58a6ff",  badge: "interface"    },
+  impl:      { fill: "#1a3a24", stroke: "#3fb950", text: "#3fb950",  badge: "class"        },
+  tester:    { fill: "#2d1f47", stroke: "#bc8cff", text: "#bc8cff",  badge: "MonoBehaviour"},
+  external:  { fill: "#3a2e0e", stroke: "#d29922", text: "#d29922",  badge: "Unity built-in"},
+};
+
+const EDGE_STYLE = {
+  implements: { stroke: "#58a6ff", dash: "8 4",  width: 1.5 },
+  event:      { stroke: "#f78166", dash: "4 3",  width: 1.5 },
+  uses:       { stroke: "#3fb950", dash: "none", width: 1.5 },
+  contains:   { stroke: "#d29922", dash: "none", width: 1.5 },
+};
+
+// ── Layout ────────────────────────────────────────────────────────────────────
+
+const NW = 190, NH = 80;
+const COLS = 4, ROWS = 3;
+const HGAP = 50, VGAP = 80;
+const MARGIN = { top: 60, left: 40, right: 40, bottom: 40 };
+
+const SVG_W = COLS * NW + (COLS - 1) * HGAP + MARGIN.left + MARGIN.right;
+const SVG_H = ROWS * NH + (ROWS - 1) * VGAP + MARGIN.top  + MARGIN.bottom;
+
+// position each node
+NODES.forEach(n => {
+  n.x = MARGIN.left + n.col * (NW + HGAP);
+  n.y = MARGIN.top  + n.layer * (NH + VGAP);
+});
+
+// helpers
+const ncx = n => n.x + NW / 2;
+const ncy = n => n.y + NH / 2;
+const byId = id => NODES.find(n => n.id === id);
+
+// ── Render ────────────────────────────────────────────────────────────────────
+
+const svg = d3.select("#diagram")
+  .attr("width",  SVG_W)
+  .attr("height", SVG_H)
+  .attr("viewBox", `0 0 ${SVG_W} ${SVG_H}`);
+
+// ── Layer labels ──────────────────────────────────────────────────────────────
+const layerLabels = ["CONTRACTS", "IMPLEMENTATIONS", "UNITY BUILT-INS"];
+[0,1,2].forEach(layer => {
+  const y = MARGIN.top + layer * (NH + VGAP);
+  svg.append("text")
+     .attr("x", 8).attr("y", y - 10)
+     .attr("fill", "#6e7681").attr("font-size", 9)
+     .attr("letter-spacing", 2)
+     .text(layerLabels[layer]);
+  svg.append("line")
+     .attr("x1", 8).attr("y1", y - 2)
+     .attr("x2", SVG_W - 8).attr("y2", y - 2)
+     .attr("stroke", "#21262d").attr("stroke-width", 1)
+     .attr("stroke-dasharray", "4 4");
+});
+
+// ── Arrowhead markers ─────────────────────────────────────────────────────────
+const defs = svg.append("defs");
+Object.entries(EDGE_STYLE).forEach(([type, s]) => {
+  defs.append("marker")
+    .attr("id", `arrow-${type}`)
+    .attr("viewBox", "0 -5 10 10")
+    .attr("refX", 10).attr("refY", 0)
+    .attr("markerWidth", 6).attr("markerHeight", 6)
+    .attr("orient", "auto")
+    .append("path")
+    .attr("d", "M0,-5L10,0L0,5Z")
+    .attr("fill", s.stroke);
+});
+
+// ── Edges ─────────────────────────────────────────────────────────────────────
+const edgeG = svg.append("g").attr("class", "edges");
+
+EDGES.forEach(e => {
+  const s = byId(e.source), t = byId(e.target);
+  const style = EDGE_STYLE[e.type];
+  if (!s || !t) return;
+
+  // Pick attachment points sensibly
+  let x1, y1, x2, y2, cx1 = 0, cy1 = 0;
+
+  if (s.layer < t.layer) {
+    // going down: bottom of source → top of target
+    x1 = ncx(s); y1 = s.y + NH;
+    x2 = ncx(t); y2 = t.y;
+  } else if (s.layer > t.layer) {
+    // going up
+    x1 = ncx(s); y1 = s.y;
+    x2 = ncx(t); y2 = t.y + NH;
+  } else {
+    // same layer: side to side
+    if (s.col < t.col) {
+      x1 = s.x + NW; y1 = ncy(s);
+      x2 = t.x;      y2 = ncy(t);
+    } else {
+      x1 = s.x;      y1 = ncy(s);
+      x2 = t.x + NW; y2 = ncy(t);
+    }
+  }
+
+  // slight curve for same-layer edges
+  const isCurve = (s.layer === t.layer);
+  const path = isCurve
+    ? `M${x1},${y1} C${x1+40},${y1-40} ${x2-40},${y2-40} ${x2},${y2}`
+    : `M${x1},${y1} L${x2},${y2}`;
+
+  edgeG.append("path")
+    .attr("class", "link")
+    .attr("d", path)
+    .attr("stroke", style.stroke)
+    .attr("stroke-width", style.width)
+    .attr("stroke-dasharray", style.dash === "none" ? null : style.dash)
+    .attr("marker-end", `url(#arrow-${e.type})`)
+    .attr("opacity", 0.75);
+
+  // label midpoint
+  const lx = (x1 + x2) / 2 + (isCurve ? 0 : 0);
+  const ly = (y1 + y2) / 2 - 7;
+
+  edgeG.append("text")
+    .attr("x", lx).attr("y", ly)
+    .attr("text-anchor", "middle")
+    .attr("fill", style.stroke)
+    .attr("font-size", 8.5)
+    .attr("opacity", 0.7)
+    .text(e.label);
+});
+
+// ── Nodes ─────────────────────────────────────────────────────────────────────
+const tooltip = document.getElementById("tooltip");
+
+const nodeG = svg.selectAll(".node")
+  .data(NODES)
+  .enter()
+  .append("g")
+  .attr("class", "node")
+  .attr("transform", d => `translate(${d.x},${d.y})`);
+
+// shadow / glow rect (slightly larger, blurred — pure SVG trick)
+nodeG.append("rect")
+  .attr("x", -2).attr("y", -2)
+  .attr("width", NW + 4).attr("height", NH + 4)
+  .attr("rx", 8)
+  .attr("fill", d => KIND[d.kind].stroke)
+  .attr("opacity", 0.08);
+
+// main rect
+nodeG.append("rect")
+  .attr("width", NW).attr("height", NH)
+  .attr("rx", 6)
+  .attr("fill",   d => KIND[d.kind].fill)
+  .attr("stroke", d => KIND[d.kind].stroke)
+  .attr("stroke-width", 1.5);
+
+// kind badge (pill above top-left corner)
+nodeG.append("rect")
+  .attr("x", 8).attr("y", -10)
+  .attr("width", d => KIND[d.kind].badge.length * 6.2 + 12)
+  .attr("height", 16)
+  .attr("rx", 4)
+  .attr("fill",   d => KIND[d.kind].fill)
+  .attr("stroke", d => KIND[d.kind].stroke)
+  .attr("stroke-width", 1);
+
+nodeG.append("text")
+  .attr("x", 14).attr("y", 1)
+  .attr("fill",      d => KIND[d.kind].text)
+  .attr("font-size", 8)
+  .attr("font-weight", 600)
+  .text(d => KIND[d.kind].badge);
+
+// title
+nodeG.append("text")
+  .attr("x", NW / 2).attr("y", 32)
+  .attr("text-anchor", "middle")
+  .attr("fill", "#e6edf3")
+  .attr("font-size", 12)
+  .attr("font-weight", 700)
+  .text(d => d.title);
+
+// subtitle
+nodeG.append("text")
+  .attr("x", NW / 2).attr("y", 50)
+  .attr("text-anchor", "middle")
+  .attr("fill", "#8b949e")
+  .attr("font-size", 8.5)
+  .text(d => d.subtitle.length > 32 ? d.subtitle.slice(0, 30) + "…" : d.subtitle);
+
+// hover divider line
+nodeG.append("line")
+  .attr("x1", 10).attr("y1", 58)
+  .attr("x2", NW - 10).attr("y2", 58)
+  .attr("stroke", d => KIND[d.kind].stroke)
+  .attr("stroke-width", 0.5)
+  .attr("opacity", 0.4);
+
+// member preview (first 2 members)
+nodeG.each(function(d) {
+  const g = d3.select(this);
+  const preview = d.members.slice(0, 2);
+  preview.forEach((m, i) => {
+    g.append("text")
+      .attr("x", 12).attr("y", 72 + i * 13)
+      .attr("fill", KIND[d.kind].text)
+      .attr("font-size", 7.5)
+      .attr("opacity", 0.75)
+      .text(m.length > 28 ? m.slice(0, 26) + "…" : m);
+  });
+});
+
+// Tooltip interactions
+nodeG
+  .on("mousemove", function(event, d) {
+    const k = KIND[d.kind];
+    tooltip.innerHTML = `
+      <div class="tt-title" style="color:${k.text}">${d.title}</div>
+      <div class="tt-kind"  style="color:${k.stroke}">${k.badge}</div>
+      <div class="tt-desc">${d.desc}</div>
+      <div class="tt-members">
+        ${d.members.map(m => `<div class="tt-member">· ${m}</div>`).join("")}
+      </div>`;
+    tooltip.style.opacity = 1;
+    tooltip.style.left = (event.clientX + 14) + "px";
+    tooltip.style.top  = (event.clientY - 10) + "px";
+  })
+  .on("mouseleave", () => { tooltip.style.opacity = 0; });
+
+// ── Legend ────────────────────────────────────────────────────────────────────
+
+const legendEl = document.getElementById("legend");
+
+// Arrow type legend
+const arrowLegend = [
+  { label: "implements",      ...EDGE_STYLE.implements },
+  { label: "event subscription", ...EDGE_STYLE.event   },
+  { label: "uses (interface)", ...EDGE_STYLE.uses       },
+  { label: "contains / has",  ...EDGE_STYLE.contains    },
+];
+
+arrowLegend.forEach(item => {
+  const el = document.createElement("div");
+  el.className = "legend-item";
+
+  const svgEl = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svgEl.setAttribute("width", "42"); svgEl.setAttribute("height", "14");
+
+  const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+  line.setAttribute("x1","0"); line.setAttribute("y1","7");
+  line.setAttribute("x2","34"); line.setAttribute("y2","7");
+  line.setAttribute("stroke", item.stroke); line.setAttribute("stroke-width","2");
+  if (item.dash !== "none") line.setAttribute("stroke-dasharray", item.dash);
+
+  const arrow = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+  arrow.setAttribute("points","34,7 27,3.5 27,10.5");
+  arrow.setAttribute("fill", item.stroke);
+
+  svgEl.appendChild(line); svgEl.appendChild(arrow);
+
+  const span = document.createElement("span");
+  span.textContent = item.label;
+
+  el.appendChild(svgEl); el.appendChild(span);
+  legendEl.appendChild(el);
+});
+
+// Kind badge legend
+const sep = document.createElement("div");
+sep.style.cssText = "width:1px;background:#30363d;height:18px;margin:auto";
+legendEl.appendChild(sep);
+
+Object.entries(KIND).forEach(([k, m]) => {
+  const el = document.createElement("div");
+  el.className = "legend-item";
+  el.innerHTML = `<div class="legend-dot" style="background:${m.fill};border-color:${m.stroke}"></div>${m.badge}`;
+  legendEl.appendChild(el);
+});
+</script>
+</body>
+</html>
