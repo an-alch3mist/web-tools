@@ -116,7 +116,7 @@ body {
     z-index: 10;
     flex-shrink: 0;
     /* ▼ Scrollable header for Android / tablet */
-    overflow-x: auto;
+    overflow-x: scroll;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
@@ -631,7 +631,8 @@ body {
 /* Code viewer */
 #code-wrapper {
     flex: 1;
-    overflow: auto;
+    overflow-x: auto;
+    overflow-y: auto;
     position: relative;
     min-height: 0;
 }
@@ -652,14 +653,17 @@ body {
 
 /* ── Markdown rendered ───────────────────────────────────────── */
 #md-rendered {
-    padding: 24px 32px;
+    padding: 24px 3%;
+    /* width is a % of #code-wrapper — no max-width cap so 100% = full container */
     width: var(--preview-width, 95%);
-    max-width: 860px;
     margin: 0 auto;
     line-height: 1.8;
     font-size: var(--md-font-size, 14px);
     font-family: var(--font-ui);
     color: var(--text-primary);
+    /* Allow wide children (tables, code) to scroll inside this box */
+    overflow-x: hidden;
+    box-sizing: border-box;
 }
 #md-rendered h1, #md-rendered h2, #md-rendered h3,
 #md-rendered h4, #md-rendered h5, #md-rendered h6 {
@@ -759,12 +763,16 @@ body {
     tab-size: 4;
     -moz-tab-size: 4;
 }
-/* Tables — advanced with scrollable wrapper */
+/* Tables — scrollable wrapper so wide tables don't break layout */
 #md-rendered .tbl-wrap {
     overflow-x: auto;
+    overflow-y: visible;
     margin: 1.2em 0;
     border-radius: 8px;
     border: 1px solid var(--border);
+    /* Ensure the wrapper itself can scroll even inside a width-constrained parent */
+    max-width: 100%;
+    width: 100%;
 }
 #md-rendered table {
     border-collapse: collapse;
@@ -808,10 +816,28 @@ body {
     font-family: var(--font-mono);
     font-size: var(--md-font-size, 13px);
     line-height: 1.55;
+    /* min-width allows horizontal scroll; actual display expands to content */
     min-width: max-content;
+    width: var(--preview-width, 95%);
+    /* whichever is larger: the percentage or the content width */
+    min-width: max(var(--preview-width, 95%), max-content);
+    tab-size: 4;
+    -moz-tab-size: 4;
+}
+
+/* Plain text */
+#plain-text {
+    padding: 14px 18px;
+    font-family: var(--font-mono);
+    font-size: var(--md-font-size, 13px);
+    line-height: 1.6;
+    white-space: pre-wrap;
+    color: var(--text-primary);
     tab-size: 4;
     -moz-tab-size: 4;
     width: var(--preview-width, 95%);
+    margin: 0 auto;
+    box-sizing: border-box;
 }
 
 #line-numbers {
@@ -837,19 +863,6 @@ body {
 }
 #code-body code.hljs, #code-body pre { background: transparent !important; padding: 0 !important; }
 #code-body .hljs { background: transparent !important; }
-
-/* Plain text */
-#plain-text {
-    padding: 14px 18px;
-    font-family: var(--font-mono);
-    font-size: var(--md-font-size, 13px);
-    line-height: 1.6;
-    white-space: pre-wrap;
-    color: var(--text-primary);
-    tab-size: 4;
-    -moz-tab-size: 4;
-    width: var(--preview-width, 95%);
-}
 
 /* ── Status Bar ──────────────────────────────────────────────── */
 #status-bar {
@@ -1625,20 +1638,16 @@ const fontSizeVal        = $('font-size-val');
 const savedPW = localStorage.getItem('phase_preview_width');
 const savedFS = localStorage.getItem('phase_font_size');
 if (savedPW) { previewWidthSlider.value = savedPW; }
-if (savedFS) { fontSizeSlider.value    = savedFS; }
+if (savedFS) { fontSizeSlider.value     = savedFS; }
 
 function applyPreviewWidth(val) {
+    // val is a number string like "95" → set as 95% of the #code-wrapper
     document.documentElement.style.setProperty('--preview-width', val + '%');
     previewWidthVal.textContent = val + '%';
 }
 function applyFontSize(val) {
     document.documentElement.style.setProperty('--md-font-size', val + 'px');
     fontSizeVal.textContent = val + 'px';
-    // Also update code view font
-    const codeViewWrap = document.getElementById('code-view-wrap');
-    if (codeViewWrap) codeViewWrap.style.fontSize = val + 'px';
-    const plainText = document.getElementById('plain-text');
-    if (plainText) plainText.style.fontSize = val + 'px';
 }
 
 applyPreviewWidth(previewWidthSlider.value);
@@ -1657,13 +1666,30 @@ fontSizeSlider.addEventListener('input', () => {
 const btnToggleSidebar  = $('btn-toggle-sidebar');
 const btnSidebarReveal  = $('btn-sidebar-reveal');
 
-function setSidebarCollapsed(collapsed) {
+function setSidebarCollapsed(collapsed, skipSave) {
     state.sidebarCollapsed = collapsed;
     sidebar.classList.toggle('collapsed', collapsed);
     resizer.classList.toggle('collapsed', collapsed);
     btnToggleSidebar.textContent = collapsed ? '▶' : '◀';
     btnToggleSidebar.title = collapsed ? 'Show sidebar' : 'Hide sidebar';
     btnSidebarReveal.style.display = collapsed ? 'flex' : 'none';
+    if (!skipSave) localStorage.setItem('phase_sidebar_collapsed', collapsed ? '1' : '0');
+}
+
+// Restore sidebar collapsed state
+if (localStorage.getItem('phase_sidebar_collapsed') === '1') {
+    setSidebarCollapsed(true, true);
+}
+
+// Restore sidebar width
+const savedSidebarW = localStorage.getItem('phase_sidebar_width');
+if (savedSidebarW) {
+    const w = parseInt(savedSidebarW, 10);
+    if (w >= 160 && w <= 500) {
+        sidebar.style.width    = w + 'px';
+        sidebar.style.minWidth = w + 'px';
+        sidebar.style.maxWidth = w + 'px';
+    }
 }
 
 btnToggleSidebar.addEventListener('click', () => setSidebarCollapsed(!state.sidebarCollapsed));
@@ -2007,6 +2033,11 @@ document.addEventListener('click', e => {
         resizer.classList.remove('dragging');
         document.body.style.cursor = '';
         document.body.style.userSelect = '';
+        // Persist sidebar width
+        const finalW = sidebar.getBoundingClientRect().width;
+        if (finalW >= 160 && finalW <= 500) {
+            localStorage.setItem('phase_sidebar_width', Math.round(finalW));
+        }
     });
 })();
 
@@ -2015,3 +2046,4 @@ hljs.configure({ tabReplace: '    ' });
 </script>
 </body>
 </html>
+
