@@ -11,12 +11,31 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
 
 <!-- highlight.js -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/csharp.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/markdown.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/shell.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/go.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/rust.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/c.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/yaml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/kotlin.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/swift.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/ruby.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/php.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/powershell.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/dockerfile.min.js"></script>
 
 <!-- marked.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
@@ -49,6 +68,7 @@
     --orange:        #d29922;
     --red:           #f85149;
     --purple:        #bc8cff;
+    --pink:          #f472b6;
     --font-ui:       'Inter', system-ui, sans-serif;
     --font-mono:     'JetBrains Mono', 'Consolas', 'Courier New', monospace;
     --sidebar-w:     260px;
@@ -56,6 +76,8 @@
     --statusbar-h:   26px;
     --radius:        6px;
     --transition:    0.15s ease;
+    --preview-width: 95%;
+    --md-font-size:  14px;
 }
 
 html, body { height: 100%; overflow: hidden; }
@@ -93,7 +115,17 @@ body {
     border-bottom: 1px solid var(--border);
     z-index: 10;
     flex-shrink: 0;
+    /* ▼ Scrollable header for Android / tablet */
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
 }
+#header::-webkit-scrollbar { display: none; }
+
+/* All header direct children must not shrink so they stay full-size */
+#header > * { flex-shrink: 0; }
+#header-center { flex-shrink: 1; }
 
 #logo {
     display: flex;
@@ -104,8 +136,13 @@ body {
     color: var(--text-primary);
     white-space: nowrap;
     letter-spacing: -0.02em;
+    cursor: pointer;
+    text-decoration: none;
+    flex-shrink: 0;
 }
-#logo .logo-icon { font-size: 18px; }
+#logo:hover .logo-icon { transform: scale(1.15); }
+#logo:hover { color: var(--accent-hover); }
+#logo .logo-icon { font-size: 18px; transition: transform 0.15s ease; }
 #logo .logo-sub { color: var(--text-secondary); font-weight: 400; font-size: 12px; }
 
 #header-center {
@@ -113,7 +150,7 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
-    min-width: 0;
+    min-width: 180px;
 }
 
 .btn {
@@ -132,6 +169,7 @@ body {
     transition: background var(--transition), border-color var(--transition), color var(--transition);
     white-space: nowrap;
     user-select: none;
+    flex-shrink: 0;
 }
 .btn:hover { background: var(--bg-hover); border-color: #484f58; }
 .btn:active { opacity: 0.8; }
@@ -189,9 +227,10 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 28px;
-    padding: 32px;
+    justify-content: flex-start;
+    gap: 20px;
+    padding: 28px 32px 40px;
+    overflow-y: auto;
 }
 
 #drop-zone {
@@ -199,11 +238,12 @@ body {
     max-width: 540px;
     border: 2px dashed var(--border);
     border-radius: 12px;
-    padding: 48px 32px;
+    padding: 40px 32px;
     text-align: center;
     cursor: pointer;
     transition: border-color var(--transition), background var(--transition);
     background: transparent;
+    flex-shrink: 0;
 }
 #drop-zone:hover, #drop-zone.drag-over {
     border-color: var(--accent);
@@ -277,6 +317,105 @@ body {
 .notice.error { background: #1a0d0d; border-color: var(--red); color: #f1adb0; }
 .notice.warn  { background: #1a1400; border-color: var(--orange); color: #e3c06b; }
 
+/* ── URL History Panel ───────────────────────────────────────── */
+#url-history-section {
+    width: 100%;
+    max-width: 760px;
+    margin-top: 4px;
+}
+#url-history-hdr {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+#url-history-title {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+#url-history-clear {
+    height: 24px;
+    padding: 0 9px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    background: var(--bg-input);
+    color: var(--text-muted);
+    font-family: var(--font-ui);
+    font-size: 11px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color .14s, border-color .14s;
+}
+#url-history-clear:hover { color: var(--red); border-color: var(--red); }
+
+#url-history-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 8px;
+}
+.url-card {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 10px 12px;
+    background: var(--bg-sidebar);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+    overflow: hidden;
+}
+.url-card:hover {
+    border-color: var(--accent);
+    background: var(--bg-hover);
+    box-shadow: 0 2px 12px rgba(56,139,253,0.15);
+}
+.url-card-top {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.url-card-icon { font-size: 14px; flex-shrink: 0; }
+.url-card-url {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent-hover);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+}
+.url-card-del {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 12px;
+    padding: 0 2px;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: color var(--transition);
+}
+.url-card-del:hover { color: var(--red); }
+.url-card-ts {
+    font-size: 10.5px;
+    color: var(--text-muted);
+    padding-left: 20px;
+}
+#url-history-empty {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 16px;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
 /* ── Viewer Layout ───────────────────────────────────────────── */
 #viewer {
     display: none;
@@ -298,7 +437,17 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    transition: width 0.2s ease, min-width 0.2s ease, max-width 0.2s ease, opacity 0.2s ease;
 }
+#sidebar.collapsed {
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    opacity: 0;
+    overflow: hidden;
+    border-right: none;
+}
+#resizer.collapsed { display: none; }
 
 #sidebar-header {
     display: flex;
@@ -314,8 +463,13 @@ body {
     letter-spacing: 0.07em;
     text-transform: uppercase;
     color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
 }
-#sidebar-actions { display: flex; gap: 4px; }
+#sidebar-actions { display: flex; gap: 4px; flex-shrink: 0; }
 
 #tree-container {
     flex: 1;
@@ -375,6 +529,29 @@ body {
     min-width: 0;
 }
 
+/* Sidebar reveal button (shown when sidebar is collapsed) */
+#btn-sidebar-reveal {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+    width: 22px;
+    height: 44px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-sidebar);
+    border: 1px solid var(--border);
+    border-radius: 0 6px 6px 0;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 12px;
+    transition: background var(--transition), color var(--transition);
+}
+#btn-sidebar-reveal:hover { background: var(--bg-hover); color: var(--accent-hover); }
+#content-area { position: relative; }
+
 /* Breadcrumb */
 #breadcrumb {
     display: flex;
@@ -397,13 +574,59 @@ body {
 #content-toolbar {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     padding: 5px 12px;
     border-bottom: 1px solid var(--border);
     background: var(--bg-sidebar);
     flex-shrink: 0;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
 }
-#content-toolbar .spacer { flex: 1; }
+#content-toolbar::-webkit-scrollbar { display: none; }
+#content-toolbar .spacer { flex: 1; min-width: 8px; }
+
+/* Width/Font controls (like markdown-viewer) */
+.ctrl-pill {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0 8px;
+    height: 26px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-input);
+    font-size: 10.5px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.ctrl-pill .ctrl-label { font-size: 10px; font-family: var(--font-mono); }
+.ctrl-pill input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 58px;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+}
+.ctrl-pill input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 11px; height: 11px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+}
+.ctrl-pill input[type="range"]::-moz-range-thumb {
+    width: 11px; height: 11px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    border: none;
+}
+.ctrl-val { font-family: var(--font-mono); font-size: 10.5px; color: var(--accent); min-width: 26px; text-align: right; }
 
 /* Code viewer */
 #code-wrapper {
@@ -422,55 +645,106 @@ body {
     justify-content: center;
     color: var(--text-muted);
     gap: 10px;
+    height: 100%;
 }
 #welcome .welcome-icon { font-size: 48px; opacity: 0.5; }
 #welcome p { font-size: 13px; }
 
-/* Markdown rendered */
+/* ── Markdown rendered ───────────────────────────────────────── */
 #md-rendered {
     padding: 24px 32px;
-    max-width: 820px;
-    line-height: 1.75;
-    font-size: 14px;
+    width: var(--preview-width, 95%);
+    max-width: 860px;
+    margin: 0 auto;
+    line-height: 1.8;
+    font-size: var(--md-font-size, 14px);
     font-family: var(--font-ui);
     color: var(--text-primary);
 }
 #md-rendered h1, #md-rendered h2, #md-rendered h3,
 #md-rendered h4, #md-rendered h5, #md-rendered h6 {
-    margin: 1.4em 0 0.5em;
+    margin: 1.6em 0 0.5em;
     font-weight: 600;
     line-height: 1.3;
+    color: var(--text-primary);
 }
-#md-rendered h1 { font-size: 1.75em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
-#md-rendered h2 { font-size: 1.35em; border-bottom: 1px solid var(--border); padding-bottom: 0.25em; }
-#md-rendered h3 { font-size: 1.1em; }
-#md-rendered p { margin: 0.75em 0; }
-#md-rendered a { color: var(--accent-hover); text-decoration: none; }
-#md-rendered a:hover { text-decoration: underline; }
+#md-rendered h1 { font-size: 1.85em; border-bottom: 2px solid var(--accent); padding-bottom: 0.3em; margin-top: 0.5em; }
+#md-rendered h2 { font-size: 1.4em; border-bottom: 1px solid var(--border); padding-bottom: 0.25em; }
+#md-rendered h3 { font-size: 1.15em; }
+#md-rendered p { margin: 0.8em 0; }
+#md-rendered a { color: var(--accent-hover); text-decoration: none; border-bottom: 1px solid rgba(88,166,255,.3); }
+#md-rendered a:hover { border-bottom-color: var(--accent-hover); }
 #md-rendered ul, #md-rendered ol { margin: 0.6em 0 0.6em 1.6em; }
-#md-rendered li { margin: 0.25em 0; }
+#md-rendered li { margin: 0.3em 0; }
 #md-rendered blockquote {
     border-left: 3px solid var(--border-focus);
     margin: 1em 0;
-    padding: 4px 16px;
+    padding: 6px 16px;
     color: var(--text-secondary);
     background: var(--bg-input);
     border-radius: 0 4px 4px 0;
+    font-style: italic;
 }
+#md-rendered blockquote > p { margin: 0; }
 #md-rendered code {
     font-family: var(--font-mono);
     font-size: 0.875em;
     background: var(--bg-input);
-    padding: 2px 5px;
+    padding: 2px 6px;
     border-radius: 3px;
-    color: var(--purple);
-}
-#md-rendered pre {
-    background: #161b22;
+    color: var(--pink);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
+}
+/* Code blocks — advanced with header */
+#md-rendered .code-block-wrap {
+    margin: 1.1em 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+#md-rendered .code-hdr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 14px;
+    background: #21252b;
+    border-bottom: 1px solid #2d3139;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+}
+#md-rendered .lang-badge {
+    padding: 1px 8px;
+    border-radius: 4px;
+    background: var(--accent-dim);
+    border: 1px solid rgba(56,139,253,.3);
+    color: var(--accent-hover);
+    font-size: 10.5px;
+    font-weight: 500;
+    text-transform: lowercase;
+    letter-spacing: .03em;
+}
+#md-rendered .ccopy {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border: 1px solid #3d4451;
+    border-radius: 4px;
+    background: transparent;
+    color: #6b7280;
+    font-family: var(--font-ui);
+    font-size: 11px;
+    padding: 2px 8px;
+    cursor: pointer;
+    transition: all .14s;
+}
+#md-rendered .ccopy:hover { color: #d1d5db; border-color: #6b7280; }
+#md-rendered .ccopy.ok { color: var(--green); border-color: var(--green); }
+#md-rendered pre {
+    background: #21252b;
     overflow-x: auto;
-    margin: 1em 0;
+    margin: 0;
+    border-radius: 0;
+    border: none;
 }
 #md-rendered pre code {
     background: transparent;
@@ -479,37 +753,65 @@ body {
     font-size: 13px;
     display: block;
     padding: 14px 18px;
+    border: none;
+    border-radius: 0;
+    line-height: 1.6;
+    tab-size: 4;
+    -moz-tab-size: 4;
+}
+/* Tables — advanced with scrollable wrapper */
+#md-rendered .tbl-wrap {
+    overflow-x: auto;
+    margin: 1.2em 0;
+    border-radius: 8px;
+    border: 1px solid var(--border);
 }
 #md-rendered table {
     border-collapse: collapse;
     width: 100%;
-    margin: 1em 0;
     font-size: 13px;
+    min-width: max-content;
 }
+#md-rendered thead { position: sticky; top: 0; z-index: 1; }
 #md-rendered th {
     background: var(--bg-input);
-    padding: 8px 12px;
-    border: 1px solid var(--border);
+    padding: 9px 14px;
+    border: none;
+    border-bottom: 1px solid var(--border);
     font-weight: 600;
     text-align: left;
+    white-space: nowrap;
+    color: var(--text-primary);
+    font-size: 12.5px;
 }
 #md-rendered td {
-    padding: 7px 12px;
-    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-bottom: 1px solid rgba(48,54,61,.6);
+    vertical-align: top;
+    line-height: 1.5;
 }
-#md-rendered tr:nth-child(even) td { background: #111820; }
-#md-rendered hr { border: none; border-top: 1px solid var(--border); margin: 1.5em 0; }
-#md-rendered img { max-width: 100%; border-radius: var(--radius); }
+#md-rendered tr:last-child td { border-bottom: none; }
+#md-rendered tr:nth-child(even) td { background: rgba(255,255,255,.03); }
+#md-rendered th[align="center"], #md-rendered td[align="center"] { text-align: center; }
+#md-rendered th[align="right"],  #md-rendered td[align="right"]  { text-align: right; }
+#md-rendered hr { border: none; height: 1px; background: linear-gradient(to right, transparent, var(--accent), transparent); opacity: .3; margin: 1.8em 0; }
+#md-rendered img { max-width: 100%; border-radius: var(--radius); border: 1px solid var(--border); display: block; margin: .4em 0; }
+#md-rendered strong { font-weight: 700; }
+#md-rendered em { font-style: italic; }
+#md-rendered del { text-decoration: line-through; color: var(--text-muted); }
+#md-rendered .md-task-item { list-style: none; margin-left: -1.2em; }
+#md-rendered .md-task-cb { margin-right: 6px; accent-color: var(--accent); }
 
 /* Code with line numbers */
 #code-view-wrap {
     display: flex;
     font-family: var(--font-mono);
-    font-size: 13px;
+    font-size: var(--md-font-size, 13px);
     line-height: 1.55;
     min-width: max-content;
     tab-size: 4;
     -moz-tab-size: 4;
+    width: var(--preview-width, 95%);
 }
 
 #line-numbers {
@@ -533,7 +835,6 @@ body {
     tab-size: 4;
     -moz-tab-size: 4;
 }
-/* Override hljs background to match ours */
 #code-body code.hljs, #code-body pre { background: transparent !important; padding: 0 !important; }
 #code-body .hljs { background: transparent !important; }
 
@@ -541,12 +842,13 @@ body {
 #plain-text {
     padding: 14px 18px;
     font-family: var(--font-mono);
-    font-size: 13px;
+    font-size: var(--md-font-size, 13px);
     line-height: 1.6;
     white-space: pre-wrap;
     color: var(--text-primary);
     tab-size: 4;
     -moz-tab-size: 4;
+    width: var(--preview-width, 95%);
 }
 
 /* ── Status Bar ──────────────────────────────────────────────── */
@@ -561,7 +863,10 @@ body {
     font-size: 11.5px;
     color: #a0c4e8;
     flex-shrink: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
 }
+#status-bar::-webkit-scrollbar { display: none; }
 .status-seg {
     padding: 0 12px;
     border-right: 1px solid #1d3a6a;
@@ -661,7 +966,7 @@ body {
     opacity: 0;
     transition: opacity 0.2s, transform 0.2s;
     pointer-events: none;
-    z-index: 999;
+    z-index: 9998;
 }
 #copy-toast.show {
     opacity: 1;
@@ -677,6 +982,52 @@ body {
     flex-shrink: 0;
 }
 #resizer:hover, #resizer.dragging { background: var(--accent); }
+
+/* ── Fullscreen mode ─────────────────────────────────────────── */
+.fullscreen-mode #header,
+.fullscreen-mode #status-bar,
+.fullscreen-mode #sidebar,
+.fullscreen-mode #resizer,
+.fullscreen-mode #breadcrumb,
+.fullscreen-mode #content-toolbar,
+.fullscreen-mode #truncation-notice {
+    display: none !important;
+}
+.fullscreen-mode #viewer {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: var(--bg-base);
+}
+.fullscreen-mode #code-wrapper {
+    border-radius: 0;
+}
+.fullscreen-mode #content-area {
+    border-radius: 0;
+}
+
+#fullscreen-exit-btn {
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    z-index: 1001;
+    display: none;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    background: rgba(13,17,23,0.85);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-family: var(--font-ui);
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: color var(--transition), border-color var(--transition), background var(--transition);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+}
+#fullscreen-exit-btn:hover { color: var(--text-primary); border-color: var(--text-muted); }
+.fullscreen-mode #fullscreen-exit-btn { display: flex; }
 </style>
 </head>
 <body>
@@ -685,7 +1036,7 @@ body {
     <!-- ── Header ──────────────────────────────────────────── -->
     <header id="header">
         <button id="hamburger" aria-label="Toggle sidebar">☰</button>
-        <div id="logo">
+        <div id="logo" role="button" tabindex="0" title="Go to home">
             <span class="logo-icon">📦</span>
             <span>Phase Viewer</span>
             <span class="logo-sub">packed .txt explorer</span>
@@ -723,7 +1074,7 @@ body {
                 <button class="btn" id="btn-paste-landing">📋 Paste Content</button>
                 <button class="btn" id="btn-browse-landing">📁 Browse File</button>
             </div>
-            <div id="or-divider2" class="landing-actions" style="flex-direction:column;gap:6px;width:100%;max-width:540px">
+            <div style="display:flex;flex-direction:column;gap:6px;width:100%;max-width:540px">
                 <div id="landing-url-row">
                     <input id="landing-url" type="text"
                         placeholder="Or paste a raw URL — e.g. raw.githubusercontent.com/…/phase.txt"
@@ -732,6 +1083,17 @@ body {
                 </div>
             </div>
             <div id="landing-notice" style="display:none"></div>
+
+            <!-- URL History -->
+            <div id="url-history-section">
+                <div id="url-history-hdr">
+                    <span id="url-history-title">🔗 Saved Links</span>
+                    <button id="url-history-clear" title="Clear all saved links">Clear all</button>
+                </div>
+                <div id="url-history-list">
+                    <div id="url-history-empty">No saved links yet — fetched URLs will appear here</div>
+                </div>
+            </div>
         </div>
 
         <!-- Viewer -->
@@ -742,18 +1104,38 @@ body {
                     <div id="sidebar-actions">
                         <button class="btn btn-sm" id="btn-expand-all" title="Expand all">⊞</button>
                         <button class="btn btn-sm" id="btn-collapse-all" title="Collapse all">⊟</button>
+                        <button class="btn btn-sm" id="btn-toggle-sidebar" title="Hide sidebar">◀</button>
                     </div>
                 </div>
                 <div id="tree-container"></div>
             </div>
             <div id="resizer"></div>
             <div id="content-area">
+                <!-- Sidebar reveal when collapsed -->
+                <button id="btn-sidebar-reveal" title="Show sidebar">▶</button>
+
                 <div id="breadcrumb"></div>
                 <div id="content-toolbar" style="display:none">
-                    <span id="toolbar-lang" style="color:var(--text-muted);font-size:11.5px"></span>
+                    <span id="toolbar-lang" style="color:var(--text-muted);font-size:11.5px;flex-shrink:0"></span>
                     <div class="spacer"></div>
+
+                    <!-- Preview width control -->
+                    <div class="ctrl-pill" title="Preview width">
+                        <span class="ctrl-label">W</span>
+                        <input type="range" id="preview-width-slider" min="40" max="100" value="95" />
+                        <span class="ctrl-val" id="preview-width-val">95%</span>
+                    </div>
+
+                    <!-- Font size control -->
+                    <div class="ctrl-pill" title="Font size">
+                        <span class="ctrl-label">Aa</span>
+                        <input type="range" id="font-size-slider" min="10" max="20" value="13" />
+                        <span class="ctrl-val" id="font-size-val">13px</span>
+                    </div>
+
                     <button class="btn btn-sm" id="btn-md-toggle" style="display:none">👁 Rendered</button>
                     <button class="btn btn-sm" id="btn-copy-file">⎘ Copy</button>
+                    <button class="btn btn-sm" id="btn-fullscreen" title="Enter fullscreen (F11)">⛶ Full</button>
                 </div>
                 <div id="truncation-notice" style="display:none">
                     <span id="truncation-text"></span>
@@ -797,19 +1179,25 @@ body {
 <!-- Copy toast -->
 <div id="copy-toast">✓ Copied to clipboard</div>
 
+<!-- Fullscreen exit button (floating, shown in fullscreen) -->
+<button id="fullscreen-exit-btn" title="Exit fullscreen (Esc)">✕ Exit Fullscreen</button>
+
 <script>
 // ── Constants ──────────────────────────────────────────────────
 const DELIMITER_RE = /^<!-- ==== FILE: (.+) ==== -->$/;
-const LINE_LIMIT = 10000;
+const LINE_LIMIT   = 10000;
+const LINKS_KEY    = 'phase_viewer_links';
 
 // ── State ──────────────────────────────────────────────────────
 let state = {
-    files: {},        // path -> content string
+    files: {},
     rootName: '',
     selectedPath: null,
     mdRendered: true,
-    fullContent: {},  // path -> full content (when truncated)
+    fullContent: {},
     sidebarOpen: false,
+    sidebarCollapsed: false,
+    isFullscreen: false,
 };
 
 // ── Element refs ───────────────────────────────────────────────
@@ -820,8 +1208,110 @@ const treeContainer  = $('tree-container');
 const codeWrapper    = $('code-wrapper');
 const breadcrumb     = $('breadcrumb');
 const contentToolbar = $('content-toolbar');
-const welcome        = $('welcome');
 const sidebar        = $('sidebar');
+const resizer        = $('resizer');
+
+// ── URL History Storage ────────────────────────────────────────
+function loadLinks() {
+    try { return JSON.parse(localStorage.getItem(LINKS_KEY) || '[]'); }
+    catch { return []; }
+}
+
+function saveLink(url) {
+    const links = loadLinks();
+    const already = links.some(l => l.url === url);
+    if (already) return;
+    links.unshift({ url, ts: Date.now() });
+    // keep at most 40
+    if (links.length > 40) links.splice(40);
+    localStorage.setItem(LINKS_KEY, JSON.stringify(links));
+    renderUrlHistory();
+}
+
+function deleteLink(url) {
+    const links = loadLinks().filter(l => l.url !== url);
+    localStorage.setItem(LINKS_KEY, JSON.stringify(links));
+    renderUrlHistory();
+}
+
+function formatRelTime(ts) {
+    const sec = Math.floor((Date.now() - ts) / 1000);
+    if (sec < 60) return 'just now';
+    if (sec < 3600) return Math.floor(sec / 60) + 'm ago';
+    if (sec < 86400) return Math.floor(sec / 3600) + 'h ago';
+    return Math.floor(sec / 86400) + 'd ago';
+}
+
+function esc(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderUrlHistory() {
+    const list  = $('url-history-list');
+    const empty = $('url-history-empty');
+    const links = loadLinks();
+
+    // Remove old cards (keep the empty placeholder)
+    Array.from(list.querySelectorAll('.url-card')).forEach(c => c.remove());
+
+    if (links.length === 0) {
+        empty.style.display = '';
+        return;
+    }
+    empty.style.display = 'none';
+
+    for (const item of links) {
+        const card = document.createElement('div');
+        card.className = 'url-card';
+        // Pretty label: just the filename part
+        const label = item.url.split('/').pop() || item.url;
+        card.innerHTML = `
+            <div class="url-card-top">
+                <span class="url-card-icon">🔗</span>
+                <span class="url-card-url" title="${esc(item.url)}">${esc(label)}</span>
+                <button class="url-card-del" title="Remove">✕</button>
+            </div>
+            <div class="url-card-ts">${esc(formatRelTime(item.ts))} · <span style="opacity:.6;font-size:10px;font-family:var(--font-mono)">${esc(item.url.length > 50 ? item.url.slice(0,50)+'…' : item.url)}</span></div>
+        `;
+        card.querySelector('.url-card-del').addEventListener('click', e => {
+            e.stopPropagation();
+            deleteLink(item.url);
+        });
+        card.addEventListener('click', () => {
+            $('landing-url').value = item.url;
+            fetchUrl(item.url);
+        });
+        list.appendChild(card);
+    }
+}
+
+$('url-history-clear').addEventListener('click', () => {
+    if (!confirm('Clear all saved links? This cannot be undone.')) return;
+    localStorage.removeItem(LINKS_KEY);
+    renderUrlHistory();
+});
+
+// Render on load
+renderUrlHistory();
+
+// ── Logo → Home ────────────────────────────────────────────────
+function goHome() {
+    // If viewer is active, go back to landing
+    if (viewer.classList.contains('active')) {
+        viewer.classList.remove('active');
+        landing.style.display = '';
+        $('btn-download-zip').style.display = 'none';
+        $('btn-reset').style.display = 'none';
+        // Keep state so user can come back
+    } else {
+        // Already on landing, just scroll to top
+        landing.scrollTop = 0;
+    }
+    exitFullscreen();
+}
+
+$('logo').addEventListener('click', goHome);
+$('logo').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') goHome(); });
 
 // ── Parser ─────────────────────────────────────────────────────
 function parsePacked(text) {
@@ -833,7 +1323,6 @@ function parsePacked(text) {
     function flush() {
         if (currentPath === null) return;
         let content = currentLines.join('\n');
-        // trim one trailing blank line
         if (content.endsWith('\n')) content = content.slice(0, -1);
         files[currentPath] = content;
     }
@@ -859,23 +1348,74 @@ function detectLang(path) {
         cs: 'csharp', md: 'markdown', json: 'json',
         xml: 'xml', html: 'html', js: 'javascript',
         ts: 'typescript', py: 'python', txt: 'plaintext',
-        yaml: 'yaml', yml: 'yaml', sh: 'bash',
+        yaml: 'yaml', yml: 'yaml', sh: 'bash', bash: 'bash',
+        go: 'go', rs: 'rust', java: 'java', cpp: 'cpp', cc: 'cpp',
+        c: 'c', h: 'c', css: 'css', sql: 'sql',
+        kt: 'kotlin', swift: 'swift', rb: 'ruby', php: 'php',
+        ps1: 'powershell', dockerfile: 'dockerfile', toml: 'toml',
     };
     return map[ext] || 'plaintext';
 }
 
 function fileIcon(name) {
     const ext = name.split('.').pop().toLowerCase();
-    if (ext === 'md')   return '📝';
-    if (ext === 'cs')   return '📄';
-    if (ext === 'json') return '📋';
-    if (ext === 'txt')  return '📄';
-    return '📄';
+    const icons = {
+        md: '📝', json: '📋', html: '🌐', xml: '📄', css: '🎨',
+        js: '⚡', ts: '⚡', py: '🐍', rs: '🦀', go: '🐹',
+        sh: '⚙', bash: '⚙', sql: '🗃', yaml: '⚙', yml: '⚙',
+        cs: '🔷', java: '☕', kt: '🔶', swift: '🍎', rb: '💎',
+        dockerfile: '🐳',
+    };
+    return icons[ext] || '📄';
 }
+
+// ── Marked renderer (advanced) ─────────────────────────────────
+function buildMarkedRenderer() {
+    const renderer = new marked.Renderer();
+
+    // Code blocks with header (language badge + copy button)
+    renderer.code = function(code, lang) {
+        const safeLang = (lang || '').toLowerCase().trim().split(/\s/)[0];
+        const validLang = safeLang && hljs.getLanguage(safeLang) ? safeLang : null;
+        let highlighted;
+        if (validLang) {
+            try { highlighted = hljs.highlight(code, { language: validLang }).value; }
+            catch { highlighted = hljs.highlightAuto(code).value; }
+        } else {
+            highlighted = hljs.highlightAuto(code).value;
+        }
+        const langDisplay = safeLang || 'text';
+        // Escape raw code for data attribute
+        const escapedCode = code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+        return `<div class="code-block-wrap"><div class="code-hdr"><span class="lang-badge">${esc(langDisplay)}</span><button class="ccopy" onclick="copyCodeBlock(this)" data-code="${escapedCode}">⎘ Copy</button></div><pre><code class="hljs">${highlighted}</code></pre></div>`;
+    };
+
+    // Tables with scrollable wrapper
+    renderer.table = function(header, body) {
+        return `<div class="tbl-wrap"><table><thead>${header}</thead><tbody>${body}</tbody></table></div>`;
+    };
+
+    return renderer;
+}
+
+window.copyCodeBlock = function(btn) {
+    const code = btn.getAttribute('data-code')
+        .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'");
+    navigator.clipboard.writeText(code).then(() => {
+        btn.textContent = '✓ Copied';
+        btn.classList.add('ok');
+        setTimeout(() => { btn.textContent = '⎘ Copy'; btn.classList.remove('ok'); }, 1800);
+    }).catch(() => {
+        const ta = document.createElement('textarea');
+        ta.value = code; document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); ta.remove();
+        btn.textContent = '✓ Copied'; btn.classList.add('ok');
+        setTimeout(() => { btn.textContent = '⎘ Copy'; btn.classList.remove('ok'); }, 1800);
+    });
+};
 
 // ── Tree building ──────────────────────────────────────────────
 function buildTree(files) {
-    // Build nested structure
     const root = {};
     for (const path of Object.keys(files)) {
         const parts = path.split('/');
@@ -892,7 +1432,6 @@ function buildTree(files) {
 }
 
 function renderTreeNode(obj, depth, container) {
-    // Sort: dirs first, then files
     const entries = Object.entries(obj).filter(([k]) => !k.startsWith('__'));
     const dirs  = entries.filter(([,v]) => v.__type === 'dir').sort(([a],[b]) => a.localeCompare(b));
     const files = entries.filter(([,v]) => v.__type === 'file').sort(([a],[b]) => a.localeCompare(b));
@@ -959,22 +1498,16 @@ function renderTreeNode(obj, depth, container) {
 // ── File selection ─────────────────────────────────────────────
 function selectFile(path) {
     state.selectedPath = path;
-
-    // Deselect old
     document.querySelectorAll('.tree-item.selected').forEach(el => el.classList.remove('selected'));
-    // Select new
     const el = document.querySelector(`.tree-item[data-path="${CSS.escape(path)}"]`);
     if (el) {
         el.classList.add('selected');
         el.scrollIntoView({ block: 'nearest' });
     }
-
-    // Close mobile sidebar
     if (window.innerWidth <= 680) {
         sidebar.classList.remove('open');
         state.sidebarOpen = false;
     }
-
     renderFile(path);
 }
 
@@ -990,26 +1523,20 @@ function renderFile(path) {
         return `<span class="${cls}">${p}</span>${i < parts.length - 1 ? '<span class="bc-sep">/</span>' : ''}`;
     }).join('');
 
-    // Toolbar
     contentToolbar.style.display = 'flex';
     $('toolbar-lang').textContent = lang;
 
-    // MD toggle
     const isMd = ext === 'md';
     const mdToggle = $('btn-md-toggle');
     mdToggle.style.display = isMd ? 'inline-flex' : 'none';
     state.mdRendered = true;
-    if (isMd) {
-        mdToggle.textContent = '📝 Raw';
-    }
+    if (isMd) mdToggle.textContent = '📝 Raw';
 
-    // Status
     const lines = content.split('\n');
     $('st-viewing').textContent = parts[parts.length - 1];
     $('st-lang').textContent = lang;
     $('st-lines').textContent = lines.length.toLocaleString();
 
-    // Truncation
     const truncNotice = $('truncation-notice');
     const needsTrunc = lines.length > LINE_LIMIT;
     state.fullContent[path] = content;
@@ -1032,11 +1559,14 @@ function _renderContent(content, lang, ext, isMd) {
     if (isMd && state.mdRendered) {
         const div = document.createElement('div');
         div.id = 'md-rendered';
-        // Configure marked for safety
-        marked.setOptions({ gfm: true, breaks: false });
+        marked.setOptions({
+            gfm: true,
+            breaks: false,
+            renderer: buildMarkedRenderer()
+        });
         div.innerHTML = marked.parse(content);
-        // Highlight code blocks inside rendered markdown
-        div.querySelectorAll('pre code').forEach(block => {
+        // Apply hljs to any code blocks that weren't handled by renderer (fallback)
+        div.querySelectorAll('pre code:not(.hljs)').forEach(block => {
             hljs.highlightElement(block);
         });
         codeWrapper.appendChild(div);
@@ -1051,27 +1581,22 @@ function _renderContent(content, lang, ext, isMd) {
         return;
     }
 
-    // Replace real tabs with 4 spaces for display
     const displayContent = content.replace(/\t/g, '    ');
     const lines = displayContent.split('\n');
 
-    // Line numbers column
     const lineNumsEl = document.createElement('div');
     lineNumsEl.id = 'line-numbers';
     lineNumsEl.innerHTML = lines.map((_, i) =>
         `<span class="ln">${i + 1}</span>`
     ).join('');
 
-    // Code body
     const codeBody = document.createElement('div');
     codeBody.id = 'code-body';
 
     const codeEl = document.createElement('code');
 
-    // Determine highlight language
     let hlLang = lang;
-    if (hlLang === 'markdown') hlLang = 'markdown';
-    else if (hlLang === 'plaintext') hlLang = null;
+    if (hlLang === 'plaintext') hlLang = null;
 
     if (hlLang && hljs.getLanguage(hlLang)) {
         codeEl.className = `language-${hlLang}`;
@@ -1089,6 +1614,84 @@ function _renderContent(content, lang, ext, isMd) {
     wrap.append(lineNumsEl, codeBody);
     codeWrapper.appendChild(wrap);
 }
+
+// ── Preview Width & Font Size Controls ─────────────────────────
+const previewWidthSlider = $('preview-width-slider');
+const previewWidthVal    = $('preview-width-val');
+const fontSizeSlider     = $('font-size-slider');
+const fontSizeVal        = $('font-size-val');
+
+// Restore saved values
+const savedPW = localStorage.getItem('phase_preview_width');
+const savedFS = localStorage.getItem('phase_font_size');
+if (savedPW) { previewWidthSlider.value = savedPW; }
+if (savedFS) { fontSizeSlider.value    = savedFS; }
+
+function applyPreviewWidth(val) {
+    document.documentElement.style.setProperty('--preview-width', val + '%');
+    previewWidthVal.textContent = val + '%';
+}
+function applyFontSize(val) {
+    document.documentElement.style.setProperty('--md-font-size', val + 'px');
+    fontSizeVal.textContent = val + 'px';
+    // Also update code view font
+    const codeViewWrap = document.getElementById('code-view-wrap');
+    if (codeViewWrap) codeViewWrap.style.fontSize = val + 'px';
+    const plainText = document.getElementById('plain-text');
+    if (plainText) plainText.style.fontSize = val + 'px';
+}
+
+applyPreviewWidth(previewWidthSlider.value);
+applyFontSize(fontSizeSlider.value);
+
+previewWidthSlider.addEventListener('input', () => {
+    applyPreviewWidth(previewWidthSlider.value);
+    localStorage.setItem('phase_preview_width', previewWidthSlider.value);
+});
+fontSizeSlider.addEventListener('input', () => {
+    applyFontSize(fontSizeSlider.value);
+    localStorage.setItem('phase_font_size', fontSizeSlider.value);
+});
+
+// ── Sidebar hide / show ────────────────────────────────────────
+const btnToggleSidebar  = $('btn-toggle-sidebar');
+const btnSidebarReveal  = $('btn-sidebar-reveal');
+
+function setSidebarCollapsed(collapsed) {
+    state.sidebarCollapsed = collapsed;
+    sidebar.classList.toggle('collapsed', collapsed);
+    resizer.classList.toggle('collapsed', collapsed);
+    btnToggleSidebar.textContent = collapsed ? '▶' : '◀';
+    btnToggleSidebar.title = collapsed ? 'Show sidebar' : 'Hide sidebar';
+    btnSidebarReveal.style.display = collapsed ? 'flex' : 'none';
+}
+
+btnToggleSidebar.addEventListener('click', () => setSidebarCollapsed(!state.sidebarCollapsed));
+btnSidebarReveal.addEventListener('click', () => setSidebarCollapsed(false));
+
+// ── Fullscreen ─────────────────────────────────────────────────
+function enterFullscreen() {
+    if (state.isFullscreen) return;
+    state.isFullscreen = true;
+    document.body.classList.add('fullscreen-mode');
+}
+
+function exitFullscreen() {
+    if (!state.isFullscreen) return;
+    state.isFullscreen = false;
+    document.body.classList.remove('fullscreen-mode');
+}
+
+$('btn-fullscreen').addEventListener('click', enterFullscreen);
+$('fullscreen-exit-btn').addEventListener('click', exitFullscreen);
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && state.isFullscreen) exitFullscreen();
+    if (e.key === 'F11' && viewer.classList.contains('active')) {
+        e.preventDefault();
+        state.isFullscreen ? exitFullscreen() : enterFullscreen();
+    }
+});
 
 // ── MD toggle ─────────────────────────────────────────────────
 $('btn-md-toggle').addEventListener('click', () => {
@@ -1112,7 +1715,6 @@ $('btn-copy-file').addEventListener('click', async () => {
         await navigator.clipboard.writeText(content);
         showToast();
     } catch {
-        // fallback
         const ta = document.createElement('textarea');
         ta.value = content;
         document.body.appendChild(ta);
@@ -1162,31 +1764,24 @@ function loadPacked(text, sourceName) {
     state.selectedPath = null;
     state.fullContent = {};
 
-    // Determine root name from first path
     const firstPath = Object.keys(files)[0];
     state.rootName = firstPath.split('/')[0] || sourceName || 'archive';
 
-    // Render tree
     treeContainer.innerHTML = '';
     const tree = buildTree(files);
     renderTreeNode(tree, 0, treeContainer);
 
-    // Status
     $('st-file-count').textContent = count;
     $('st-viewing').textContent = '—';
     $('st-lang').textContent = '—';
     $('st-lines').textContent = '—';
-
-    // Update sidebar title
     $('sidebar-title').textContent = state.rootName;
 
-    // Show viewer
     landing.style.display = 'none';
     viewer.classList.add('active');
     $('btn-download-zip').style.display = 'inline-flex';
     $('btn-reset').style.display = 'inline-flex';
 
-    // Reset content panel
     contentToolbar.style.display = 'none';
     breadcrumb.innerHTML = '';
     $('truncation-notice').style.display = 'none';
@@ -1233,6 +1828,8 @@ $('btn-reset').addEventListener('click', () => {
     $('url-input').value = '';
     $('landing-url').value = '';
     $('file-input').value = '';
+    exitFullscreen();
+    renderUrlHistory();
 });
 
 // ── File input ────────────────────────────────────────────────
@@ -1286,7 +1883,6 @@ async function pasteContent() {
 $('btn-paste-landing').addEventListener('click', pasteContent);
 $('btn-paste-header').addEventListener('click', pasteContent);
 
-// Global Ctrl+V when no input focused
 document.addEventListener('keydown', e => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
         const active = document.activeElement;
@@ -1303,12 +1899,10 @@ async function fetchUrl(rawUrl) {
     let url = rawUrl.trim();
     if (!url) return;
 
-    // Auto-prepend https:// if missing
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
         url = 'https://' + url;
     }
 
-    // Show spinner
     landing.style.display = 'flex';
     const spinner = document.createElement('div');
     spinner.className = 'spinner-wrap';
@@ -1323,6 +1917,10 @@ async function fetchUrl(rawUrl) {
         }
         const text = await res.text();
         landing.removeChild(spinner);
+
+        // ▼ Save to localStorage (unique links only)
+        saveLink(url);
+
         loadPacked(text, url.split('/').pop().replace(/\.txt$/, '') || 'fetched');
     } catch (err) {
         landing.removeChild(spinner);
@@ -1350,25 +1948,16 @@ function showLandingNotice(html, type) {
 
 // ── Expand / Collapse all ─────────────────────────────────────
 $('btn-expand-all').addEventListener('click', () => {
-    document.querySelectorAll('.tree-children').forEach(el => {
-        el.classList.add('open');
-    });
-    document.querySelectorAll('.tree-arrow').forEach(el => {
-        el.classList.add('open');
-    });
-    document.querySelectorAll('.tree-icon').forEach((el, i) => {
-        // Only folder icons
+    document.querySelectorAll('.tree-children').forEach(el => el.classList.add('open'));
+    document.querySelectorAll('.tree-arrow').forEach(el => el.classList.add('open'));
+    document.querySelectorAll('.tree-item .tree-icon').forEach(el => {
         if (el.textContent === '📁') el.textContent = '📂';
     });
 });
 
 $('btn-collapse-all').addEventListener('click', () => {
-    document.querySelectorAll('.tree-children').forEach(el => {
-        el.classList.remove('open');
-    });
-    document.querySelectorAll('.tree-arrow').forEach(el => {
-        el.classList.remove('open');
-    });
+    document.querySelectorAll('.tree-children').forEach(el => el.classList.remove('open'));
+    document.querySelectorAll('.tree-arrow').forEach(el => el.classList.remove('open'));
     document.querySelectorAll('.tree-item .tree-icon').forEach(el => {
         if (el.textContent === '📂') el.textContent = '📁';
     });
@@ -1380,7 +1969,6 @@ $('hamburger').addEventListener('click', () => {
     sidebar.classList.toggle('open', state.sidebarOpen);
 });
 
-// Close sidebar on outside click (mobile)
 document.addEventListener('click', e => {
     if (window.innerWidth <= 680 && state.sidebarOpen) {
         if (!sidebar.contains(e.target) && e.target !== $('hamburger')) {
@@ -1392,7 +1980,6 @@ document.addEventListener('click', e => {
 
 // ── Resizer (drag to resize sidebar) ──────────────────────────
 (function() {
-    const resizer = $('resizer');
     let dragging = false;
     let startX, startW;
 
