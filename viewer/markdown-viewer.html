@@ -69,6 +69,7 @@
     --sb:             26px;
     --toc-w:          218px;
     --ease:           cubic-bezier(0.4, 0, 0.2, 1);
+    --md-font-size:   16px;
 }
 
 /* light theme overrides */
@@ -251,16 +252,23 @@ body {
 #fname-display {
     font-family: var(--font-code);
     font-size: 11.5px;
-    color: var(--text-muted);
+    color: var(--text-dim);
     padding: 3px 8px;
     background: var(--surface2);
     border: 1px solid var(--border-soft);
     border-radius: 5px;
-    max-width: 160px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    width: 148px;
+    outline: none;
+    transition: border-color .15s, color .15s, background .15s;
+    cursor: text;
 }
+#fname-display:hover { border-color: var(--text-muted); }
+#fname-display:focus { border-color: var(--accent); color: var(--text); background: var(--surface); }
+
+/* Logo home button */
+#logo { cursor: pointer; }
+#logo:hover .logo-badge { filter: brightness(1.15); }
+#logo:hover .logo-text { color: var(--accent); }
 
 /* ══ Main body ═══════════════════════════════════════════════ */
 #main { flex: 1; min-height: 0; position: relative; overflow: hidden; display: flex; }
@@ -589,7 +597,7 @@ body {
 /* ══ Markdown preview styles ══════════════════════════════════ */
 .md {
     font-family: var(--font-prose);
-    font-size: 16px;
+    font-size: var(--md-font-size, 16px);
     line-height: 1.8;
     color: var(--text);
 }
@@ -964,7 +972,7 @@ body {
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 /* ══ Width slider control ════════════════════════════════════ */
-#width-ctrl {
+#width-ctrl, #font-ctrl {
     display: flex;
     align-items: center;
     gap: 5px;
@@ -977,32 +985,34 @@ body {
     color: var(--text-muted);
     white-space: nowrap;
 }
-#width-ctrl .wlbl { font-family: var(--font-code); font-size: 10.5px; }
-#prev-width-slider {
+#width-ctrl .wlbl, #font-ctrl .wlbl { font-family: var(--font-code); font-size: 10.5px; }
+#prev-width-slider, #font-size-slider {
     -webkit-appearance: none;
     appearance: none;
-    width: 72px;
+    width: 64px;
     height: 3px;
     background: var(--border);
     border-radius: 2px;
     outline: none;
     cursor: pointer;
 }
-#prev-width-slider::-webkit-slider-thumb {
+#prev-width-slider::-webkit-slider-thumb,
+#font-size-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 12px; height: 12px;
     border-radius: 50%;
     background: var(--accent);
     cursor: pointer;
 }
-#prev-width-slider::-moz-range-thumb {
+#prev-width-slider::-moz-range-thumb,
+#font-size-slider::-moz-range-thumb {
     width: 12px; height: 12px;
     border-radius: 50%;
     background: var(--accent);
     cursor: pointer;
     border: none;
 }
-#width-val { font-family: var(--font-code); font-size: 10.5px; color: var(--accent); min-width: 30px; }
+#width-val, #font-size-val { font-family: var(--font-code); font-size: 10.5px; color: var(--accent); min-width: 28px; text-align: right; }
 
 /* ══ Recent files (landing) ══════════════════════════════════ */
 #recent-section {
@@ -1051,6 +1061,12 @@ body {
 .recent-item:hover .recent-del { opacity: 1; }
 .recent-del:hover { color: var(--red); }
 
+@media (max-width: 960px) {
+    #font-ctrl { display: none; }
+}
+@media (max-width: 780px) {
+    #width-ctrl { display: none; }
+}
 @media (max-width: 720px) {
     #toc { display: none !important; }
     .t-btn span { display: none; }
@@ -1091,13 +1107,18 @@ body {
 
     <div id="hdr-actions">
         <div id="fname-wrap">
-            <span id="fname-display">untitled.md</span>
+            <input type="text" id="fname-display" value="untitled.md" spellcheck="false" title="Click to rename" />
         </div>
         <button class="icon-btn" id="btn-toc" title="Toggle contents sidebar">☰</button>
-        <div id="width-ctrl" title="Adjust preview width">
+        <div id="width-ctrl" title="Preview width">
             <span class="wlbl">⟷</span>
             <input type="range" id="prev-width-slider" min="40" max="100" value="72" step="1" />
             <span id="width-val">72%</span>
+        </div>
+        <div id="font-ctrl" title="Font size">
+            <span class="wlbl">Aa</span>
+            <input type="range" id="font-size-slider" min="12" max="24" value="16" step="1" />
+            <span id="font-size-val">16px</span>
         </div>
         <button class="icon-btn" id="btn-theme" title="Toggle light/dark">🌙</button>
         <button class="hbtn" id="btn-copy-md" title="Copy raw Markdown">⎘ <span class="btn-lbl">MD</span></button>
@@ -1217,11 +1238,16 @@ const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;
 
 /* ══ State ══════════════════════════════════════════════════ */
 let MD = '';
-let curTab = 'raw';
-let dark = true;
-let fname = 'untitled.md';
+let curTab   = localStorage.getItem('mdv_tab')   || 'raw';
+let dark     = (localStorage.getItem('mdv_theme') || 'dark') === 'dark';
+let fname    = 'untitled.md';
+let currentFileId = null;   // stable id of the file currently open
+let autoSaveTimer = null;
 let renderPending = false;
 let tocObserver = null;
+
+// Apply persisted theme immediately (before paint)
+document.documentElement.dataset.theme = dark ? 'dark' : 'light';
 
 /* ══ Refs ═══════════════════════════════════════════════════ */
 const landing      = $('landing');
@@ -1443,6 +1469,7 @@ function updateStats() {
 /* ══ Tab switching ══════════════════════════════════════════ */
 function setTab(tab) {
     curTab = tab;
+    localStorage.setItem('mdv_tab', tab);
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
     $('panel-' + tab).classList.add('on');
     document.querySelectorAll('.t-btn').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
@@ -1470,10 +1497,11 @@ tabs.addEventListener('click', e => {
 });
 
 /* ══ Enter workspace ════════════════════════════════════════ */
-function enter(src, name) {
+function enter(src, name, existingId = null) {
     MD = src;
     fname = name || 'untitled.md';
-    $('fname-display').textContent = fname;
+    $('fname-display').value = fname;
+    document.title = fname + ' — Markdown Viewer';
     rawEditor.value = MD;
     splitEd.value = MD;
     setLnums(MD, lnums);
@@ -1482,8 +1510,15 @@ function enter(src, name) {
     landing.classList.add('hidden');
     workspace.classList.add('active');
     setTimeout(() => setTab(curTab), 40);
-    // Save to history
-    if (src.trim()) addToHistory(fname, src);
+    // Save/update history
+    if (src.trim()) {
+        if (existingId) {
+            currentFileId = existingId;
+            updateCurrentInHistory(fname, src);
+        } else {
+            addToHistory(fname, src);
+        }
+    }
 }
 
 /* ══ Landing actions ════════════════════════════════════════ */
@@ -1552,6 +1587,7 @@ rawEditor.addEventListener('input', () => {
     setLnums(MD, lnums, cur);
     schedRender();
     updateStats();
+    schedAutoSave();
 });
 rawEditor.addEventListener('scroll', () => syncScroll(rawEditor, lnums));
 rawEditor.addEventListener('keydown', editorKeys);
@@ -1569,6 +1605,7 @@ splitEd.addEventListener('input', () => {
     rawEditor.value = MD;
     setLnums(MD, splitLnums);
     schedRender();
+    schedAutoSave();
 });
 splitEd.addEventListener('scroll', () => syncScroll(splitEd, splitLnums));
 splitEd.addEventListener('keydown', editorKeys);
@@ -1669,6 +1706,33 @@ window.copyCode = async function(btn, enc) {
     setTimeout(() => { btn.textContent = '⎘ Copy'; btn.classList.remove('ok'); }, 1500);
 };
 
+/* ══ Logo → Home ════════════════════════════════════════════ */
+$('logo').addEventListener('click', () => {
+    clearTimeout(autoSaveTimer);
+    if (currentFileId && MD.trim()) updateCurrentInHistory(fname, MD);
+    workspace.classList.remove('active');
+    landing.classList.remove('hidden');
+    renderRecentList();
+});
+
+/* ══ Filename rename ════════════════════════════════════════ */
+const fnameInput = $('fname-display');
+fnameInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); fnameInput.blur(); }
+    if (e.key === 'Escape') { fnameInput.value = fname; fnameInput.blur(); }
+});
+fnameInput.addEventListener('blur', () => {
+    let newName = fnameInput.value.trim() || 'untitled.md';
+    if (!newName.match(/\.[a-z]+$/i)) newName += '.md';
+    fname = newName;
+    fnameInput.value = fname;
+    document.title = fname + ' — Markdown Viewer';
+    updateCurrentInHistory(fname, MD);
+    toast('✓ Renamed to ' + fname);
+});
+// Prevent clicks on the filename field from bubbling to logo
+fnameInput.addEventListener('click', e => e.stopPropagation());
+
 /* ══ TOC toggle ═════════════════════════════════════════════ */
 let tocUserHidden = false;
 
@@ -1697,10 +1761,8 @@ function applyPreviewWidth(val) {
     widthVal.textContent = val + '%';
 }
 
-// Init from stored preference or default
 (function() {
-    const saved = localStorage.getItem('mdv_prev_width');
-    const v = saved ? parseInt(saved) : 72;
+    const v = parseInt(localStorage.getItem('mdv_prev_width') || '72');
     widthSlider.value = v;
     applyPreviewWidth(v);
 })();
@@ -1710,27 +1772,66 @@ widthSlider.addEventListener('input', () => {
     localStorage.setItem('mdv_prev_width', widthSlider.value);
 });
 
+/* ══ Font size slider ════════════════════════════════════════ */
+const fontSlider = $('font-size-slider');
+const fontSizeVal = $('font-size-val');
+
+function applyFontSize(val) {
+    document.documentElement.style.setProperty('--md-font-size', val + 'px');
+    fontSizeVal.textContent = val + 'px';
+}
+
+(function() {
+    const v = parseInt(localStorage.getItem('mdv_font_size') || '16');
+    fontSlider.value = v;
+    applyFontSize(v);
+})();
+
+fontSlider.addEventListener('input', () => {
+    applyFontSize(parseInt(fontSlider.value));
+    localStorage.setItem('mdv_font_size', fontSlider.value);
+});
+
 /* ══ localStorage history ═══════════════════════════════════ */
-const HIST_KEY    = 'mdv_history';
-const HIST_MAX    = 12;
+const HIST_KEY = 'mdv_history';
+const HIST_MAX = 16;
 
 function loadHistory() {
     try { return JSON.parse(localStorage.getItem(HIST_KEY) || '[]'); }
     catch { return []; }
 }
 
-function saveHistory() {
-    localStorage.setItem(HIST_KEY, JSON.stringify(loadHistory()));
+function genId() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 }
 
 function addToHistory(name, content) {
     let hist = loadHistory();
-    // Remove duplicate by name
+    const existing = hist.find(h => h.name === name);
+    const id = existing ? existing.id : genId();
     hist = hist.filter(h => h.name !== name);
-    hist.unshift({ name, content, ts: Date.now() });
+    hist.unshift({ id, name, content, ts: Date.now() });
     if (hist.length > HIST_MAX) hist = hist.slice(0, HIST_MAX);
     localStorage.setItem(HIST_KEY, JSON.stringify(hist));
+    currentFileId = id;
     renderRecentList();
+}
+
+function updateCurrentInHistory(newName, newContent) {
+    if (!currentFileId) return;
+    let hist = loadHistory();
+    const idx = hist.findIndex(h => h.id === currentFileId);
+    if (idx === -1) { addToHistory(newName, newContent); return; }
+    const entry = { ...hist[idx], name: newName, content: newContent, ts: Date.now() };
+    hist.splice(idx, 1);
+    hist.unshift(entry);
+    localStorage.setItem(HIST_KEY, JSON.stringify(hist.slice(0, HIST_MAX)));
+    renderRecentList();
+}
+
+function schedAutoSave() {
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(() => updateCurrentInHistory(fname, MD), 1800);
 }
 
 function formatRelTime(ts) {
@@ -1754,17 +1855,17 @@ function renderRecentList() {
     hist.forEach((item, idx) => {
         const row = document.createElement('div');
         row.className = 'recent-item';
+        const preview = item.content.trim().split('\n')[0].replace(/^#+\s*/, '').slice(0, 60);
         row.innerHTML = `
             <span class="recent-icon">📄</span>
             <div class="recent-meta">
                 <div class="recent-name">${esc(item.name)}</div>
-                <div class="recent-ts">${formatRelTime(item.ts)} · ${item.content.length.toLocaleString()} chars</div>
+                <div class="recent-ts">${formatRelTime(item.ts)} · ${item.content.length.toLocaleString()} chars${preview ? ' · ' + esc(preview) : ''}</div>
             </div>
-            <button class="recent-del" data-idx="${idx}" title="Remove from history">✕</button>`;
-        // Click to open (but not on delete btn)
+            <button class="recent-del" title="Remove">✕</button>`;
         row.addEventListener('click', e => {
             if (e.target.closest('.recent-del')) return;
-            enter(item.content, item.name);
+            enter(item.content, item.name, item.id);
             setTab('preview');
         });
         row.querySelector('.recent-del').addEventListener('click', e => {
@@ -1786,7 +1887,10 @@ $('btn-theme').addEventListener('click', () => {
     dark = !dark;
     document.documentElement.dataset.theme = dark ? 'dark' : 'light';
     $('btn-theme').textContent = dark ? '🌙' : '☀️';
+    localStorage.setItem('mdv_theme', dark ? 'dark' : 'light');
 });
+// Sync button label with persisted theme
+$('btn-theme').textContent = dark ? '🌙' : '☀️';
 
 /* ══ Toast ══════════════════════════════════════════════════ */
 function toast(msg, dur = 1800) {
@@ -1818,13 +1922,15 @@ function toast(msg, dur = 1800) {
 
 /* ══ Pill init ══════════════════════════════════════════════ */
 window.addEventListener('load', () => {
+    hljs.configure({ tabReplace: '    ' });
+    // Sync tab pill with persisted curTab
+    document.querySelectorAll('.t-btn').forEach(b => b.classList.toggle('on', b.dataset.tab === curTab));
     const b = document.querySelector('.t-btn.on');
     if (b) {
         const sr = tabs.getBoundingClientRect(), br = b.getBoundingClientRect();
         pill.style.left = (br.left - sr.left - 3) + 'px';
         pill.style.width = br.width + 'px';
     }
-    hljs.configure({ tabReplace: '    ' });
 });
 </script>
 </body>
