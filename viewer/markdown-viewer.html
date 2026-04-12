@@ -39,6 +39,8 @@
 
 <!-- marked.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<!-- lz-string for URL hash sharing -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
 
 <style>
 /* ══ Reset ═══════════════════════════════════════════════════ */
@@ -1014,52 +1016,158 @@ body {
 }
 #width-val, #font-size-val { font-family: var(--font-code); font-size: 10.5px; color: var(--accent); min-width: 28px; text-align: right; }
 
-/* ══ Recent files (landing) ══════════════════════════════════ */
+/* ══ Recent files — card grid ════════════════════════════════ */
 #recent-section {
     width: 100%;
-    max-width: 660px;
+    max-width: 860px;
 }
-#recent-section h3 {
+#recent-hdr {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+#recent-title {
     font-size: 10.5px;
     font-weight: 700;
     letter-spacing: .08em;
     text-transform: uppercase;
     color: var(--text-muted);
-    margin-bottom: 8px;
-    padding: 0 2px;
+    white-space: nowrap;
 }
-#recent-list {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-.recent-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 12px;
+#recent-search {
+    flex: 1;
+    height: 28px;
     background: var(--surface);
     border: 1px solid var(--border-soft);
-    border-radius: 8px;
+    border-radius: 6px;
+    padding: 0 10px;
+    font-family: var(--font-code);
+    font-size: 11.5px;
+    color: var(--text);
+    outline: none;
+    transition: border-color .15s;
+}
+#recent-search::placeholder { color: var(--text-muted); }
+#recent-search:focus { border-color: var(--accent); }
+#recent-clear {
+    height: 28px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-family: var(--font-code);
+    font-size: 11px;
     cursor: pointer;
-    transition: border-color .15s, background .15s;
+    white-space: nowrap;
+    transition: color .14s, border-color .14s;
 }
-.recent-item:hover { border-color: var(--accent); background: var(--surface2); }
-.recent-icon { font-size: 14px; flex-shrink: 0; }
-.recent-meta { flex: 1; min-width: 0; }
-.recent-name { font-family: var(--font-code); font-size: 12px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.recent-ts { font-size: 10.5px; color: var(--text-muted); margin-top: 1px; }
-.recent-del {
+#recent-clear:hover { color: var(--red); border-color: var(--red); }
+
+#recent-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 8px;
+}
+#recent-empty {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 20px;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.rc {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding: 13px 14px 11px;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color .15s, background .15s, box-shadow .15s;
+    overflow: hidden;
+}
+.rc:hover {
+    border-color: var(--accent);
+    background: var(--surface2);
+    box-shadow: 0 2px 14px rgba(0,0,0,.22);
+}
+.rc-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+.rc-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.rc-name {
+    flex: 1;
+    font-family: var(--font-code);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    word-break: break-all;
+    line-height: 1.35;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    padding: 0 2px;
+    outline: none;
+    background: transparent;
+    transition: border-color .14s, background .14s;
+    cursor: pointer;
+}
+.rc-name:focus {
+    border-color: var(--accent);
+    background: var(--surface);
+    cursor: text;
+}
+.rc-del {
     flex-shrink: 0;
-    width: 18px; height: 18px;
+    width: 20px; height: 20px;
     display: flex; align-items: center; justify-content: center;
-    border: none; background: transparent;
-    color: var(--text-muted); font-size: 11px; cursor: pointer;
-    border-radius: 3px; opacity: 0;
-    transition: opacity .14s, color .14s;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity .14s, color .14s, border-color .14s, background .14s;
+    margin-top: -2px;
 }
-.recent-item:hover .recent-del { opacity: 1; }
-.recent-del:hover { color: var(--red); }
+.rc:hover .rc-del { opacity: 1; }
+.rc-del:hover { color: var(--red); border-color: var(--red); background: rgba(248,113,113,.08); }
+.rc-preview {
+    font-size: 11.5px;
+    color: var(--text-dim);
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.9em;
+}
+.rc-meta {
+    font-family: var(--font-code);
+    font-size: 10px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.rc-meta-dot { color: var(--border); }
+.rc-tag {
+    display: inline-block;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 9.5px;
+    background: var(--accent-mid);
+    color: var(--accent);
+    border: 1px solid rgba(52,211,153,.2);
+}
+[data-theme="light"] .rc-tag { background: rgba(10,143,95,.1); border-color: rgba(10,143,95,.2); }
 
 @media (max-width: 960px) {
     #font-ctrl { display: none; }
@@ -1124,6 +1232,7 @@ body {
         <button class="hbtn" id="btn-copy-md" title="Copy raw Markdown">⎘ <span class="btn-lbl">MD</span></button>
         <button class="hbtn" id="btn-copy-html" title="Copy rendered HTML">⎘ <span class="btn-lbl">HTML</span></button>
         <button class="hbtn primary" id="btn-dl" title="Download .md">↓ .md</button>
+        <button class="hbtn" id="btn-share" title="Copy shareable link">🔗 <span class="btn-lbl">Share</span></button>
     </div>
 </header>
 
@@ -1169,7 +1278,11 @@ Drag & drop a .md file · Ctrl+Enter to preview"></textarea>
             </div>
         </div>
         <div id="recent-section" style="display:none">
-            <h3>Recent Files</h3>
+            <div id="recent-hdr">
+                <span id="recent-title">Recent Files</span>
+                <input type="text" id="recent-search" placeholder="Filter files…" spellcheck="false" />
+                <button id="recent-clear" title="Clear all history">Clear all</button>
+            </div>
             <div id="recent-list"></div>
         </div>
     </div>
@@ -1510,14 +1623,12 @@ function enter(src, name, existingId = null) {
     landing.classList.add('hidden');
     workspace.classList.add('active');
     setTimeout(() => setTab(curTab), 40);
-    // Save/update history
-    if (src.trim()) {
-        if (existingId) {
-            currentFileId = existingId;
-            updateCurrentInHistory(fname, src);
-        } else {
-            addToHistory(fname, src);
-        }
+    // Always save/update history
+    if (existingId) {
+        currentFileId = existingId;
+        updateCurrentInHistory(fname, src);
+    } else {
+        addToHistory(fname, src);
     }
 }
 
@@ -1723,32 +1834,44 @@ fnameInput.addEventListener('keydown', e => {
 });
 fnameInput.addEventListener('blur', () => {
     let newName = fnameInput.value.trim() || 'untitled.md';
-    if (!newName.match(/\.[a-z]+$/i)) newName += '.md';
+    if (!newName.match(/\.[a-zA-Z]+$/)) newName += '.md';
+    const oldName = fname;
     fname = newName;
     fnameInput.value = fname;
     document.title = fname + ' — Markdown Viewer';
+    // updateCurrentInHistory handles null currentFileId by calling addToHistory
     updateCurrentInHistory(fname, MD);
-    toast('✓ Renamed to ' + fname);
+    if (newName !== oldName) toast('✓ Renamed → ' + fname);
 });
 // Prevent clicks on the filename field from bubbling to logo
 fnameInput.addEventListener('click', e => e.stopPropagation());
 
 /* ══ TOC toggle ═════════════════════════════════════════════ */
-let tocUserHidden = false;
+let tocUserHidden = localStorage.getItem('mdv_toc_hidden') === '1';
+
+function setTocHidden(hide) {
+    tocUserHidden = hide;
+    localStorage.setItem('mdv_toc_hidden', hide ? '1' : '0');
+    if (hide) {
+        tocEl.classList.remove('show');
+        $('btn-toc').style.color = '';
+        $('btn-toc').style.borderColor = '';
+    }
+}
 
 $('btn-toc').addEventListener('click', () => {
-    tocUserHidden = !tocEl.classList.contains('show') ? false : true;
-    tocEl.classList.toggle('show');
-    $('btn-toc').style.color = tocEl.classList.contains('show') ? 'var(--accent)' : '';
-    $('btn-toc').style.borderColor = tocEl.classList.contains('show') ? 'var(--accent)' : '';
+    if (tocEl.classList.contains('show')) {
+        setTocHidden(true);
+    } else {
+        tocUserHidden = false;
+        localStorage.setItem('mdv_toc_hidden', '0');
+        tocEl.classList.add('show');
+        $('btn-toc').style.color = 'var(--accent)';
+        $('btn-toc').style.borderColor = 'var(--accent)';
+    }
 });
 
-$('toc-close').addEventListener('click', () => {
-    tocUserHidden = true;
-    tocEl.classList.remove('show');
-    $('btn-toc').style.color = '';
-    $('btn-toc').style.borderColor = '';
-});
+$('toc-close').addEventListener('click', () => setTocHidden(true));
 
 /* ══ Preview width slider ════════════════════════════════════ */
 const widthSlider = $('prev-width-slider');
@@ -1794,38 +1917,45 @@ fontSlider.addEventListener('input', () => {
 
 /* ══ localStorage history ═══════════════════════════════════ */
 const HIST_KEY = 'mdv_history';
-const HIST_MAX = 16;
+const HIST_MAX = 40;
 
 function loadHistory() {
     try { return JSON.parse(localStorage.getItem(HIST_KEY) || '[]'); }
     catch { return []; }
 }
-
+function saveHistoryArr(arr) {
+    localStorage.setItem(HIST_KEY, JSON.stringify(arr.slice(0, HIST_MAX)));
+}
 function genId() {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 }
 
+// Always creates a brand-new entry (new paste / new file drop).
+// Does NOT deduplicate by name — same-name files coexist.
 function addToHistory(name, content) {
-    let hist = loadHistory();
-    const existing = hist.find(h => h.name === name);
-    const id = existing ? existing.id : genId();
-    hist = hist.filter(h => h.name !== name);
+    const id = genId();
+    const hist = loadHistory();
     hist.unshift({ id, name, content, ts: Date.now() });
-    if (hist.length > HIST_MAX) hist = hist.slice(0, HIST_MAX);
-    localStorage.setItem(HIST_KEY, JSON.stringify(hist));
+    saveHistoryArr(hist);
     currentFileId = id;
     renderRecentList();
 }
 
+// Updates an existing entry by its stable id.
+// If the id is missing (edge case), falls back to addToHistory.
 function updateCurrentInHistory(newName, newContent) {
-    if (!currentFileId) return;
-    let hist = loadHistory();
-    const idx = hist.findIndex(h => h.id === currentFileId);
+    if (!currentFileId) {
+        // No id yet — create a fresh entry now
+        addToHistory(newName, newContent);
+        return;
+    }
+    const hist = loadHistory();
+    const idx  = hist.findIndex(h => h.id === currentFileId);
     if (idx === -1) { addToHistory(newName, newContent); return; }
     const entry = { ...hist[idx], name: newName, content: newContent, ts: Date.now() };
     hist.splice(idx, 1);
     hist.unshift(entry);
-    localStorage.setItem(HIST_KEY, JSON.stringify(hist.slice(0, HIST_MAX)));
+    saveHistoryArr(hist);
     renderRecentList();
 }
 
@@ -1845,51 +1975,172 @@ function formatRelTime(ts) {
     return 'just now';
 }
 
+let recentSearchQ = '';
+
 function renderRecentList() {
-    const hist = loadHistory();
+    const allHist = loadHistory();
     const sec  = $('recent-section');
     const list = $('recent-list');
-    if (!hist.length) { sec.style.display = 'none'; return; }
+    const q    = recentSearchQ.toLowerCase().trim();
+    const hist = q ? allHist.filter(h => h.name.toLowerCase().includes(q) ||
+                                         h.content.toLowerCase().includes(q)) : allHist;
+
+    if (!allHist.length) { sec.style.display = 'none'; return; }
     sec.style.display = '';
     list.innerHTML = '';
-    hist.forEach((item, idx) => {
-        const row = document.createElement('div');
-        row.className = 'recent-item';
-        const preview = item.content.trim().split('\n')[0].replace(/^#+\s*/, '').slice(0, 60);
-        row.innerHTML = `
-            <span class="recent-icon">📄</span>
-            <div class="recent-meta">
-                <div class="recent-name">${esc(item.name)}</div>
-                <div class="recent-ts">${formatRelTime(item.ts)} · ${item.content.length.toLocaleString()} chars${preview ? ' · ' + esc(preview) : ''}</div>
+
+    if (!hist.length) {
+        list.innerHTML = `<div id="recent-empty">No files match "${esc(q)}"</div>`;
+        return;
+    }
+
+    hist.forEach(item => {
+        // Build preview: strip headings markers, take first non-empty lines
+        const lines = item.content.split('\n').map(l => l.replace(/^#+\s*/, '').trim()).filter(Boolean);
+        const previewText = lines.slice(0, 3).join(' ').slice(0, 120);
+        const wordCount = item.content.trim() ? item.content.trim().split(/\s+/).length : 0;
+
+        const card = document.createElement('div');
+        card.className = 'rc';
+        card.dataset.id = item.id;
+        card.innerHTML = `
+            <div class="rc-top">
+                <span class="rc-icon">📄</span>
+                <span class="rc-name" contenteditable="false" spellcheck="false" title="Double-click to rename">${esc(item.name)}</span>
+                <button class="rc-del" title="Delete">✕</button>
             </div>
-            <button class="recent-del" title="Remove">✕</button>`;
-        row.addEventListener('click', e => {
-            if (e.target.closest('.recent-del')) return;
+            <div class="rc-preview">${esc(previewText) || '<span style="opacity:.4">Empty file</span>'}</div>
+            <div class="rc-meta">
+                <span>${formatRelTime(item.ts)}</span>
+                <span class="rc-meta-dot">·</span>
+                <span>${wordCount.toLocaleString()} words</span>
+                <span class="rc-meta-dot">·</span>
+                <span>${(item.content.length / 1024).toFixed(1)}KB</span>
+                ${item.fromUrl ? '<span class="rc-tag">url</span>' : ''}
+            </div>`;
+
+        const nameEl = card.querySelector('.rc-name');
+        const delBtn = card.querySelector('.rc-del');
+
+        // Open file on click (not when editing name or deleting)
+        card.addEventListener('click', e => {
+            if (e.target === delBtn || nameEl.contentEditable === 'true') return;
             enter(item.content, item.name, item.id);
-            setTab('preview');
+            setTab(curTab);
         });
-        row.querySelector('.recent-del').addEventListener('click', e => {
+
+        // Double-click name to rename inline
+        nameEl.addEventListener('dblclick', e => {
             e.stopPropagation();
-            let h = loadHistory();
-            h.splice(idx, 1);
-            localStorage.setItem(HIST_KEY, JSON.stringify(h));
+            nameEl.contentEditable = 'true';
+            nameEl.focus();
+            const range = document.createRange();
+            range.selectNodeContents(nameEl);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+        });
+        nameEl.addEventListener('keydown', e => {
+            if (e.key === 'Enter') { e.preventDefault(); nameEl.blur(); }
+            if (e.key === 'Escape') { nameEl.textContent = esc(item.name); nameEl.blur(); }
+            e.stopPropagation();
+        });
+        nameEl.addEventListener('blur', () => {
+            nameEl.contentEditable = 'false';
+            let newName = nameEl.textContent.trim() || item.name;
+            if (!newName.match(/\.[a-zA-Z]+$/)) newName += '.md';
+            nameEl.textContent = newName;
+            // Update this specific entry in history by id
+            const hist2 = loadHistory();
+            const i2 = hist2.findIndex(h => h.id === item.id);
+            if (i2 !== -1) {
+                hist2[i2].name = newName;
+                saveHistoryArr(hist2);
+                item.name = newName; // update local ref
+                // If this is the currently open file, sync header too
+                if (item.id === currentFileId) {
+                    fname = newName;
+                    $('fname-display').value = newName;
+                    document.title = newName + ' — Markdown Viewer';
+                }
+            }
             renderRecentList();
         });
-        list.appendChild(row);
+
+        // Delete
+        delBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            const hist2 = loadHistory().filter(h => h.id !== item.id);
+            saveHistoryArr(hist2);
+            if (item.id === currentFileId) currentFileId = null;
+            renderRecentList();
+        });
+
+        list.appendChild(card);
     });
 }
+
+// Search filter
+$('recent-search').addEventListener('input', e => {
+    recentSearchQ = e.target.value;
+    renderRecentList();
+});
+// Clear all
+$('recent-clear').addEventListener('click', () => {
+    if (!confirm('Clear all file history? This cannot be undone.')) return;
+    localStorage.removeItem(HIST_KEY);
+    currentFileId = null;
+    renderRecentList();
+});
 
 // Render on page load
 renderRecentList();
 
+/* ══ URL hash — load shared file ════════════════════════════ */
+(function() {
+    const hash = location.hash.slice(1);
+    if (!hash || hash.length < 8) return;
+    try {
+        const content = LZString.decompressFromBase64(hash);
+        if (content && content.length > 0) {
+            // Clear hash from URL without reload
+            history.replaceState(null, '', location.pathname + location.search);
+            // Enter with a generated name
+            const nameFromHash = 'fromurl.md';
+            // Small delay so DOM is ready
+            setTimeout(() => {
+                enter(content, nameFromHash);
+                // Mark as fromUrl in history
+                const hist = loadHistory();
+                const idx  = hist.findIndex(h => h.id === currentFileId);
+                if (idx !== -1) { hist[idx].fromUrl = true; saveHistoryArr(hist); }
+                setTab('preview');
+                toast('📎 Loaded from shared link');
+            }, 80);
+        }
+    } catch(e) { /* Not a valid hash — ignore */ }
+})();
 
+/* ══ Share link ══════════════════════════════════════════════ */
+$('btn-share').addEventListener('click', async () => {
+    if (!MD.trim()) { toast('⚠ Nothing to share'); return; }
+    const compressed = LZString.compressToBase64(MD);
+    const url = location.origin + location.pathname + '#' + compressed;
+    try { await navigator.clipboard.writeText(url); }
+    catch {
+        const ta = Object.assign(document.createElement('textarea'), { value: url });
+        document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); ta.remove();
+    }
+    toast('🔗 Share link copied!', 2400);
+});
+
+/* ══ Theme toggle ═══════════════════════════════════════════ */
 $('btn-theme').addEventListener('click', () => {
     dark = !dark;
     document.documentElement.dataset.theme = dark ? 'dark' : 'light';
     $('btn-theme').textContent = dark ? '🌙' : '☀️';
     localStorage.setItem('mdv_theme', dark ? 'dark' : 'light');
 });
-// Sync button label with persisted theme
 $('btn-theme').textContent = dark ? '🌙' : '☀️';
 
 /* ══ Toast ══════════════════════════════════════════════════ */
@@ -1899,11 +2150,16 @@ function toast(msg, dur = 1800) {
     setTimeout(() => t.classList.remove('show'), dur);
 }
 
-/* ══ Split divider drag ══════════════════════════════════════ */
+/* ══ Split divider drag (with saved position) ═══════════════ */
 (function() {
     const div = $('vdivider'), sr = $('split-raw'), sp = $('split-prev-scroll');
     let drag = false;
-    div.addEventListener('mousedown', e => {
+    // Restore saved split
+    const savedSplit = parseInt(localStorage.getItem('mdv_split_pct') || '50');
+    sr.style.flex = `0 0 ${savedSplit}%`;
+    sp.style.flex  = `0 0 ${100 - savedSplit}%`;
+
+    div.addEventListener('mousedown', () => {
         drag = true; div.classList.add('drag');
         document.body.style.cssText += 'cursor:col-resize;user-select:none';
     });
@@ -1912,18 +2168,21 @@ function toast(msg, dur = 1800) {
         const p = div.parentElement.getBoundingClientRect();
         const pct = Math.max(20, Math.min(80, (e.clientX - p.left) / p.width * 100));
         sr.style.flex = `0 0 ${pct}%`;
-        sp.style.flex  = `0 0 ${100-pct}%`;
+        sp.style.flex  = `0 0 ${100 - pct}%`;
     });
     document.addEventListener('mouseup', () => {
-        if (!drag) return; drag = false; div.classList.remove('drag');
+        if (!drag) return;
+        drag = false; div.classList.remove('drag');
         document.body.style.cursor = ''; document.body.style.userSelect = '';
+        // Save position
+        const curPct = parseFloat(sr.style.flex.match(/[\d.]+/)?.[0] || 50);
+        localStorage.setItem('mdv_split_pct', Math.round(curPct));
     });
 })();
 
 /* ══ Pill init ══════════════════════════════════════════════ */
 window.addEventListener('load', () => {
     hljs.configure({ tabReplace: '    ' });
-    // Sync tab pill with persisted curTab
     document.querySelectorAll('.t-btn').forEach(b => b.classList.toggle('on', b.dataset.tab === curTab));
     const b = document.querySelector('.t-btn.on');
     if (b) {
