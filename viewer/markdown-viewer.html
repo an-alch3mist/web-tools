@@ -435,6 +435,10 @@ body {
     tab-size: 4;
     -moz-tab-size: 4;
     caret-color: var(--accent);
+    white-space: pre;
+    overflow-wrap: normal;
+    word-break: normal;
+    overflow-x: auto;
 }
 #raw-editor::selection { background: var(--accent-mid); }
 
@@ -465,7 +469,24 @@ body {
     padding: 0 14px 10px;
     border-bottom: 1px solid var(--border-soft);
     margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
+#toc-close {
+    width: 18px; height: 18px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--surface2);
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 11px;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: color .14s, border-color .14s, background .14s;
+}
+#toc-close:hover { color: var(--text); border-color: var(--text-muted); background: var(--border); }
 
 .toc-a {
     display: block;
@@ -538,6 +559,10 @@ body {
     tab-size: 4;
     -moz-tab-size: 4;
     caret-color: var(--accent);
+    white-space: pre;
+    overflow-wrap: normal;
+    word-break: normal;
+    overflow-x: auto;
 }
 #split-editor::selection { background: var(--accent-mid); }
 
@@ -938,7 +963,94 @@ body {
 }
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* ══ Responsive ══════════════════════════════════════════════ */
+/* ══ Width slider control ════════════════════════════════════ */
+#width-ctrl {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0 8px;
+    height: 32px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface2);
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+#width-ctrl .wlbl { font-family: var(--font-code); font-size: 10.5px; }
+#prev-width-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 72px;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+}
+#prev-width-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+}
+#prev-width-slider::-moz-range-thumb {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    border: none;
+}
+#width-val { font-family: var(--font-code); font-size: 10.5px; color: var(--accent); min-width: 30px; }
+
+/* ══ Recent files (landing) ══════════════════════════════════ */
+#recent-section {
+    width: 100%;
+    max-width: 660px;
+}
+#recent-section h3 {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    padding: 0 2px;
+}
+#recent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.recent-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+}
+.recent-item:hover { border-color: var(--accent); background: var(--surface2); }
+.recent-icon { font-size: 14px; flex-shrink: 0; }
+.recent-meta { flex: 1; min-width: 0; }
+.recent-name { font-family: var(--font-code); font-size: 12px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.recent-ts { font-size: 10.5px; color: var(--text-muted); margin-top: 1px; }
+.recent-del {
+    flex-shrink: 0;
+    width: 18px; height: 18px;
+    display: flex; align-items: center; justify-content: center;
+    border: none; background: transparent;
+    color: var(--text-muted); font-size: 11px; cursor: pointer;
+    border-radius: 3px; opacity: 0;
+    transition: opacity .14s, color .14s;
+}
+.recent-item:hover .recent-del { opacity: 1; }
+.recent-del:hover { color: var(--red); }
+
 @media (max-width: 720px) {
     #toc { display: none !important; }
     .t-btn span { display: none; }
@@ -980,6 +1092,12 @@ body {
     <div id="hdr-actions">
         <div id="fname-wrap">
             <span id="fname-display">untitled.md</span>
+        </div>
+        <button class="icon-btn" id="btn-toc" title="Toggle contents sidebar">☰</button>
+        <div id="width-ctrl" title="Adjust preview width">
+            <span class="wlbl">⟷</span>
+            <input type="range" id="prev-width-slider" min="40" max="100" value="72" step="1" />
+            <span id="width-val">72%</span>
         </div>
         <button class="icon-btn" id="btn-theme" title="Toggle light/dark">🌙</button>
         <button class="hbtn" id="btn-copy-md" title="Copy raw Markdown">⎘ <span class="btn-lbl">MD</span></button>
@@ -1029,6 +1147,10 @@ Drag & drop a .md file · Ctrl+Enter to preview"></textarea>
                 <button class="hbtn primary" id="btn-go">Preview →</button>
             </div>
         </div>
+        <div id="recent-section" style="display:none">
+            <h3>Recent Files</h3>
+            <div id="recent-list"></div>
+        </div>
     </div>
 
     <!-- Workspace -->
@@ -1038,14 +1160,14 @@ Drag & drop a .md file · Ctrl+Enter to preview"></textarea>
         <div class="panel on" id="panel-raw">
             <div id="raw-wrap">
                 <div id="lnums"></div>
-                <textarea id="raw-editor" spellcheck="false" autocorrect="off" autocapitalize="off"></textarea>
+                <textarea id="raw-editor" spellcheck="false" autocorrect="off" autocapitalize="off" wrap="off"></textarea>
             </div>
         </div>
 
         <!-- Preview -->
         <div class="panel" id="panel-preview">
             <div id="toc">
-                <div id="toc-head">Contents</div>
+                <div id="toc-head"><span>Contents</span><button id="toc-close" title="Close sidebar">✕</button></div>
                 <nav id="toc-nav"></nav>
             </div>
             <div id="prev-scroll">
@@ -1057,7 +1179,7 @@ Drag & drop a .md file · Ctrl+Enter to preview"></textarea>
         <div class="panel" id="panel-split">
             <div id="split-raw">
                 <div id="split-lnums"></div>
-                <textarea id="split-editor" spellcheck="false" autocorrect="off" autocapitalize="off"></textarea>
+                <textarea id="split-editor" spellcheck="false" autocorrect="off" autocapitalize="off" wrap="off"></textarea>
             </div>
             <div id="vdivider"></div>
             <div id="split-prev-scroll">
@@ -1274,7 +1396,11 @@ function buildTOC(html) {
         });
         tocNav.appendChild(a);
     });
-    tocEl.classList.add('show');
+    if (!tocUserHidden) {
+        tocEl.classList.add('show');
+        $('btn-toc').style.color = 'var(--accent)';
+        $('btn-toc').style.borderColor = 'var(--accent)';
+    }
     setupTOCObserver();
 }
 
@@ -1356,6 +1482,8 @@ function enter(src, name) {
     landing.classList.add('hidden');
     workspace.classList.add('active');
     setTimeout(() => setTab(curTab), 40);
+    // Save to history
+    if (src.trim()) addToHistory(fname, src);
 }
 
 /* ══ Landing actions ════════════════════════════════════════ */
@@ -1541,7 +1669,119 @@ window.copyCode = async function(btn, enc) {
     setTimeout(() => { btn.textContent = '⎘ Copy'; btn.classList.remove('ok'); }, 1500);
 };
 
-/* ══ Theme toggle ═══════════════════════════════════════════ */
+/* ══ TOC toggle ═════════════════════════════════════════════ */
+let tocUserHidden = false;
+
+$('btn-toc').addEventListener('click', () => {
+    tocUserHidden = !tocEl.classList.contains('show') ? false : true;
+    tocEl.classList.toggle('show');
+    $('btn-toc').style.color = tocEl.classList.contains('show') ? 'var(--accent)' : '';
+    $('btn-toc').style.borderColor = tocEl.classList.contains('show') ? 'var(--accent)' : '';
+});
+
+$('toc-close').addEventListener('click', () => {
+    tocUserHidden = true;
+    tocEl.classList.remove('show');
+    $('btn-toc').style.color = '';
+    $('btn-toc').style.borderColor = '';
+});
+
+/* ══ Preview width slider ════════════════════════════════════ */
+const widthSlider = $('prev-width-slider');
+const widthVal    = $('width-val');
+
+function applyPreviewWidth(val) {
+    const pct = val + '%';
+    prevBody.style.maxWidth = pct;
+    $('split-prev-body').style.maxWidth = pct;
+    widthVal.textContent = val + '%';
+}
+
+// Init from stored preference or default
+(function() {
+    const saved = localStorage.getItem('mdv_prev_width');
+    const v = saved ? parseInt(saved) : 72;
+    widthSlider.value = v;
+    applyPreviewWidth(v);
+})();
+
+widthSlider.addEventListener('input', () => {
+    applyPreviewWidth(parseInt(widthSlider.value));
+    localStorage.setItem('mdv_prev_width', widthSlider.value);
+});
+
+/* ══ localStorage history ═══════════════════════════════════ */
+const HIST_KEY    = 'mdv_history';
+const HIST_MAX    = 12;
+
+function loadHistory() {
+    try { return JSON.parse(localStorage.getItem(HIST_KEY) || '[]'); }
+    catch { return []; }
+}
+
+function saveHistory() {
+    localStorage.setItem(HIST_KEY, JSON.stringify(loadHistory()));
+}
+
+function addToHistory(name, content) {
+    let hist = loadHistory();
+    // Remove duplicate by name
+    hist = hist.filter(h => h.name !== name);
+    hist.unshift({ name, content, ts: Date.now() });
+    if (hist.length > HIST_MAX) hist = hist.slice(0, HIST_MAX);
+    localStorage.setItem(HIST_KEY, JSON.stringify(hist));
+    renderRecentList();
+}
+
+function formatRelTime(ts) {
+    const diff = Date.now() - ts;
+    const m = Math.floor(diff / 60000);
+    const h = Math.floor(m / 60);
+    const d = Math.floor(h / 24);
+    if (d > 0) return `${d}d ago`;
+    if (h > 0) return `${h}h ago`;
+    if (m > 0) return `${m}m ago`;
+    return 'just now';
+}
+
+function renderRecentList() {
+    const hist = loadHistory();
+    const sec  = $('recent-section');
+    const list = $('recent-list');
+    if (!hist.length) { sec.style.display = 'none'; return; }
+    sec.style.display = '';
+    list.innerHTML = '';
+    hist.forEach((item, idx) => {
+        const row = document.createElement('div');
+        row.className = 'recent-item';
+        row.innerHTML = `
+            <span class="recent-icon">📄</span>
+            <div class="recent-meta">
+                <div class="recent-name">${esc(item.name)}</div>
+                <div class="recent-ts">${formatRelTime(item.ts)} · ${item.content.length.toLocaleString()} chars</div>
+            </div>
+            <button class="recent-del" data-idx="${idx}" title="Remove from history">✕</button>`;
+        // Click to open (but not on delete btn)
+        row.addEventListener('click', e => {
+            if (e.target.closest('.recent-del')) return;
+            enter(item.content, item.name);
+            setTab('preview');
+        });
+        row.querySelector('.recent-del').addEventListener('click', e => {
+            e.stopPropagation();
+            let h = loadHistory();
+            h.splice(idx, 1);
+            localStorage.setItem(HIST_KEY, JSON.stringify(h));
+            renderRecentList();
+        });
+        list.appendChild(row);
+    });
+}
+
+// Render on page load
+renderRecentList();
+
+
 $('btn-theme').addEventListener('click', () => {
     dark = !dark;
     document.documentElement.dataset.theme = dark ? 'dark' : 'light';
