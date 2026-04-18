@@ -9,15 +9,15 @@ const TOOLS = [
     },
     {
         name: "Pack The Files In Subfolder",
-        path: "https://github.com/an-alch3mist/web-tools/blob/main/filesCombiner/pack.md",
+        path: "https://github.com/an-alch3mist/web-tools/blob/main/pack/pack.md",
         icon: "📄",
         ac: "var(--teal)",
         status: "ready",
         tags: ["docs"]
     },
     {
-        name: "UnPack The Files From Given Txt",
-        path: "pack/unpack-files.html",
+        name: "unpack the files from given txt",
+        path: "view/unpack-viewer.html",
         icon: "📄",
         ac: "var(--teal)",
         status: "ready",
@@ -25,7 +25,7 @@ const TOOLS = [
     },
     {
         name: "Markdown Viewer",
-        path: "viewer/markdown-viewer.html",
+        path: "view/markdown-viewer.html",
         icon: "📄",
         ac: "var(--teal)",
         status: "ready",
