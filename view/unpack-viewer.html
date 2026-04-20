@@ -2107,6 +2107,9 @@ document.addEventListener('click', e => {
 
 // ── hljs config ───────────────────────────────────────────────
 hljs.configure({ tabReplace: '    ' });
+
+// ── Disable GFM strikethrough (~ used for "approximately") ────
+marked.use({ tokenizer: { del() {} } });
 </script>
 </body>
 </html>
