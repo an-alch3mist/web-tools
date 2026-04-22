@@ -8,10 +8,10 @@ const TOOLS = [
         tags: ["visualizer", "d3", "architecture", "graph", "svg", "unity"]
     },
     {
-        name: "Pack The Files In Subfolder",
+        name: "pack the files for given folder tree",
         path: "https://github.com/an-alch3mist/web-tools/blob/main/pack/pack.md",
         icon: "📄",
-        ac: "var(--teal)",
+        ac: "var(--red)",
         status: "ready",
         tags: ["docs"]
     },
