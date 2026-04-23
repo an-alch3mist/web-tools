@@ -704,6 +704,14 @@ body {
 #welcome .welcome-icon { font-size: 48px; opacity: 0.5; }
 #welcome p { font-size: 13px; }
 
+/* HTML live preview */
+#html-preview-frame {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: #fff;
+}
+
 /* ── Markdown rendered ───────────────────────────────────────── */
 #md-rendered {
     padding: 24px 3%;
@@ -1209,6 +1217,7 @@ body {
                     </div>
 
                     <button class="btn btn-sm" id="btn-md-toggle" style="display:none">👁 Rendered</button>
+                    <button class="btn btn-sm" id="btn-html-toggle" style="display:none">👁 Preview</button>
                     <button class="btn btn-sm" id="btn-copy-file">⎘ Copy</button>
                     <button class="btn btn-sm" id="btn-fullscreen" title="Enter fullscreen (F11)">⛶ Full</button>
                 </div>
@@ -1269,6 +1278,7 @@ let state = {
     rootName: '',
     selectedPath: null,
     mdRendered: true,
+    htmlRendered: false,
     fullContent: {},
     sidebarOpen: false,
     sidebarCollapsed: false,
@@ -1611,10 +1621,15 @@ function renderFile(path) {
     $('toolbar-lang').textContent = lang;
 
     const isMd = ext === 'md';
+    const isHtml = ext === 'html' || ext === 'htm';
     const mdToggle = $('btn-md-toggle');
+    const htmlToggle = $('btn-html-toggle');
     mdToggle.style.display = isMd ? 'inline-flex' : 'none';
+    htmlToggle.style.display = isHtml ? 'inline-flex' : 'none';
     state.mdRendered = true;
+    state.htmlRendered = false;
     if (isMd) mdToggle.textContent = '📝 Raw';
+    if (isHtml) htmlToggle.textContent = '👁 Preview';
 
     const lines = content.split('\n');
     $('st-viewing').textContent = parts[parts.length - 1];
@@ -1639,6 +1654,16 @@ function renderFile(path) {
 
 function _renderContent(content, lang, ext, isMd) {
     codeWrapper.innerHTML = '';
+
+    // HTML live preview (use full content for intact document)
+    if ((ext === 'html' || ext === 'htm') && state.htmlRendered) {
+        const iframe = document.createElement('iframe');
+        iframe.id = 'html-preview-frame';
+        iframe.sandbox = 'allow-scripts';
+        iframe.srcdoc = state.files[state.selectedPath] || content;
+        codeWrapper.appendChild(iframe);
+        return;
+    }
 
     if (isMd && state.mdRendered) {
         const div = document.createElement('div');
@@ -1759,31 +1784,43 @@ if (savedSidebarW) {
 btnToggleSidebar.addEventListener('click', () => setSidebarCollapsed(!state.sidebarCollapsed));
 btnSidebarReveal.addEventListener('click', () => setSidebarCollapsed(false));
 
-// ── Fullscreen ─────────────────────────────────────────────────
+// ── Fullscreen (native browser API) ────────────────────────────
 function enterFullscreen() {
     if (state.isFullscreen) return;
+    const el = document.documentElement;
+    const rfs = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+    if (rfs) rfs.call(el);
     state.isFullscreen = true;
     document.body.classList.add('fullscreen-mode');
 }
 
 function exitFullscreen() {
     if (!state.isFullscreen) return;
+    const efs = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+    if (efs && document.fullscreenElement) efs.call(document);
     state.isFullscreen = false;
     document.body.classList.remove('fullscreen-mode');
 }
+
+// Sync state when browser exits fullscreen natively (e.g. Esc key)
+document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement && state.isFullscreen) {
+        state.isFullscreen = false;
+        document.body.classList.remove('fullscreen-mode');
+    }
+});
 
 $('btn-fullscreen').addEventListener('click', enterFullscreen);
 $('fullscreen-exit-btn').addEventListener('click', exitFullscreen);
 
 document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && state.isFullscreen) exitFullscreen();
     if (e.key === 'F11' && viewer.classList.contains('active')) {
         e.preventDefault();
         state.isFullscreen ? exitFullscreen() : enterFullscreen();
     }
 });
 
-// ── MD toggle ─────────────────────────────────────────────────
+// ── MD toggle ─────────────────────────────────────────────
 $('btn-md-toggle').addEventListener('click', () => {
     state.mdRendered = !state.mdRendered;
     $('btn-md-toggle').textContent = state.mdRendered ? '📝 Raw' : '👁 Rendered';
@@ -1794,6 +1831,21 @@ $('btn-md-toggle').addEventListener('click', () => {
         const needsTrunc = lines.length > LINE_LIMIT;
         const displayContent = needsTrunc ? lines.slice(0, LINE_LIMIT).join('\n') : content;
         _renderContent(displayContent, detectLang(path), path.split('.').pop().toLowerCase(), true);
+    }
+});
+
+// ── HTML toggle ───────────────────────────────────────────
+$('btn-html-toggle').addEventListener('click', () => {
+    state.htmlRendered = !state.htmlRendered;
+    $('btn-html-toggle').textContent = state.htmlRendered ? '📝 Raw' : '👁 Preview';
+    if (state.selectedPath) {
+        const path = state.selectedPath;
+        const content = state.files[path];
+        const ext = path.split('.').pop().toLowerCase();
+        const lines = content.split('\n');
+        const needsTrunc = lines.length > LINE_LIMIT;
+        const displayContent = needsTrunc ? lines.slice(0, LINE_LIMIT).join('\n') : content;
+        _renderContent(displayContent, detectLang(path), ext, false);
     }
 });
 
