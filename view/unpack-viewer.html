@@ -1403,7 +1403,7 @@ $('logo').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === 
 // ── Parser ─────────────────────────────────────────────────────
 function parsePacked(text) {
     const files = {};
-    const lines = text.split('\n');
+    const lines = text.replace(/\r\n?/g, '\n').split('\n');
     let currentPath = null;
     let currentLines = [];
 
@@ -1480,6 +1480,16 @@ function buildMarkedRenderer() {
     // Tables with scrollable wrapper
     renderer.table = function(header, body) {
         return `<div class="tbl-wrap"><table><thead>${header}</thead><tbody>${body}</tbody></table></div>`;
+    };
+
+    // Task list checkboxes (interactive)
+    let taskIdx = 0;
+    renderer.listitem = function(text, task, checked) {
+        if (task) {
+            const i = taskIdx++;
+            return `<li class="md-task-item"><input type="checkbox" class="md-task-cb" data-task-index="${i}"${checked ? ' checked' : ''} />${text}</li>\n`;
+        }
+        return `<li>${text}</li>\n`;
     };
 
     return renderer;
@@ -1677,6 +1687,23 @@ function _renderContent(content, lang, ext, isMd) {
         // Apply hljs to any code blocks that weren't handled by renderer (fallback)
         div.querySelectorAll('pre code:not(.hljs)').forEach(block => {
             hljs.highlightElement(block);
+        });
+        // Interactive task checkboxes
+        div.querySelectorAll('.md-task-cb').forEach(cb => {
+            cb.addEventListener('change', () => {
+                const path = state.selectedPath;
+                if (!path) return;
+                const src = state.files[path];
+                const re = /- \[([ xX])\]/g;
+                let idx = 0, result = src.replace(re, (m, ch) => {
+                    if (idx++ === parseInt(cb.dataset.taskIndex)) {
+                        return ch.trim() ? '- [ ]' : '- [x]';
+                    }
+                    return m;
+                });
+                state.files[path] = result;
+                state.fullContent[path] = result;
+            });
         });
         codeWrapper.appendChild(div);
         return;
